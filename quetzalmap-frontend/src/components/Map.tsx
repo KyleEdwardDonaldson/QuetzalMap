@@ -42,6 +42,8 @@ function QuetzalTileLayer({ apiUrl, world }: { apiUrl: string; world: string }) 
       tileSize={512}
       minNativeZoom={0}
       maxNativeZoom={0}
+      minZoom={-3}
+      maxZoom={3}
       noWrap={true}
       keepBuffer={4}
       updateWhenIdle={false}
