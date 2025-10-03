@@ -46,7 +46,7 @@ public class MinecraftRegion {
             LOGGER.fine("Chunk " + chunkX + "," + chunkZ + " loaded successfully");
             chunks.put(pos, chunk);
         } else {
-            LOGGER.warning("Chunk " + chunkX + "," + chunkZ + " is NULL after loading");
+            LOGGER.fine("Chunk " + chunkX + "," + chunkZ + " does not exist in region");
         }
         return chunk;
     }
@@ -66,8 +66,8 @@ public class MinecraftRegion {
             int location = raf.readInt();
             LOGGER.fine("Chunk " + chunkX + "," + chunkZ + " location header: " + location);
             if (location == 0) {
-                LOGGER.warning("Chunk " + chunkX + "," + chunkZ + " location is 0 (doesn't exist in region)");
-                return null; // Chunk doesn't exist
+                // Chunk doesn't exist in region - this is normal for ungenerated chunks
+                return null;
             }
 
             int offset = (location >> 8) * 4096;
@@ -76,7 +76,7 @@ public class MinecraftRegion {
             LOGGER.fine("Chunk " + chunkX + "," + chunkZ + " offset=" + offset + ", sectorCount=" + sectorCount);
 
             if (offset == 0 || sectorCount == 0) {
-                LOGGER.warning("Chunk " + chunkX + "," + chunkZ + " has invalid offset or sector count");
+                // Invalid chunk data - silently skip
                 return null;
             }
 
@@ -88,7 +88,7 @@ public class MinecraftRegion {
             LOGGER.fine("Chunk " + chunkX + "," + chunkZ + " length=" + length + ", compressionType=" + compressionType);
 
             if (length == 0 || compressionType == 0) {
-                LOGGER.warning("Chunk " + chunkX + "," + chunkZ + " has invalid length or compression type");
+                // Invalid chunk data - silently skip
                 return null;
             }
 
