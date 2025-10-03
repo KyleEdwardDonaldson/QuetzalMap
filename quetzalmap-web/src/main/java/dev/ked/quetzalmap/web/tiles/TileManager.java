@@ -27,14 +27,21 @@ public final class TileManager {
         this.cache = new TileCache(storage);
         this.renderer = new TileRenderer();
         this.dirtyTracker = new DirtyTileTracker();
-        this.renderExecutor = Executors.newFixedThreadPool(4,
+
+        // Auto-scale render threads based on CPU cores
+        // Leave 2 cores for Minecraft server, cap at 16 for stability
+        int cores = Runtime.getRuntime().availableProcessors();
+        int renderThreads = Math.max(2, Math.min(cores - 2, 16));
+
+        this.renderExecutor = Executors.newFixedThreadPool(renderThreads,
                 r -> {
                     Thread t = new Thread(r, "TileRenderer");
                     t.setDaemon(true);
                     return t;
                 });
 
-        LOGGER.info("TileManager initialized with tiles directory: " + tilesDirectory);
+        LOGGER.info("TileManager initialized: tilesDir=" + tilesDirectory +
+                ", renderThreads=" + renderThreads + " (cores=" + cores + ")");
     }
 
     /**

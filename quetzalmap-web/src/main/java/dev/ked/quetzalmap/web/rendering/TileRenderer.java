@@ -21,7 +21,14 @@ public final class TileRenderer {
     private final ChunkPixelDataPool pixelPool;
 
     public TileRenderer() {
-        this.pixelPool = new ChunkPixelDataPool(256); // Pool of 256 chunk pixel buffers
+        // Auto-scale pool size based on CPU cores
+        // Each thread needs ~32 chunks in flight
+        int cores = Runtime.getRuntime().availableProcessors();
+        int renderThreads = Math.max(2, Math.min(cores - 2, 16));
+        int poolSize = renderThreads * 64; // 64 chunks per thread
+
+        this.pixelPool = new ChunkPixelDataPool(poolSize);
+        LOGGER.info("TileRenderer initialized with pixel pool size: " + poolSize);
     }
 
     /**
