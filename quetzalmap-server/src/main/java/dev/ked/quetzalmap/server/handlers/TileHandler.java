@@ -58,17 +58,17 @@ public final class TileHandler implements HttpHandler {
             int z = Integer.parseInt(matcher.group(4));
 
             TileCoord coord = new TileCoord(world, zoom, x, z);
-            LOGGER.info("*** TILE REQUEST: " + coord + " ***");
+            LOGGER.fine("Tile request: " + coord);
 
             // Check if tile exists on disk
             Path tilePath = tilesDirectory.resolve(coord.getRelativePath());
 
             if (Files.exists(tilePath)) {
-                LOGGER.info("Tile exists on disk at: " + tilePath + " - serving from cache");
+                LOGGER.fine("Serving cached tile: " + tilePath);
                 // Serve from disk
                 serveTileFromDisk(exchange, tilePath);
             } else {
-                LOGGER.info("Tile does NOT exist on disk - rendering new tile");
+                LOGGER.fine("Rendering new tile: " + coord);
                 // Tile doesn't exist - need to render
                 Path worldDir = worldsDirectory.resolve(coord.getWorld());
                 renderAndServeTile(exchange, coord, worldDir);
@@ -111,7 +111,7 @@ public final class TileHandler implements HttpHandler {
     private void renderAndServeTile(HttpServerExchange exchange, TileCoord coord, Path worldDir) {
         exchange.dispatch(() -> {
             try {
-                LOGGER.info("Rendering tile for world directory: " + worldDir.toAbsolutePath());
+                LOGGER.fine("Rendering tile for world directory: " + worldDir.toAbsolutePath());
 
                 // Render tile asynchronously
                 CompletableFuture<Tile> future = tileManager.renderTile(coord, worldDir);
