@@ -7,9 +7,6 @@ import { useSSE } from './hooks/useSSE';
 // Use direct backend URL for both dev and prod to avoid proxy issues with SSE
 const API_URL = import.meta.env.VITE_API_URL || 'http://216.238.79.60:8123';
 
-// All possible worlds to check
-const POSSIBLE_WORLDS = ['world', 'world_nether', 'world_the_end'];
-
 function App() {
   const [world, setWorld] = useState('world');
   const [availableWorlds, setAvailableWorlds] = useState<string[]>(['world']);
@@ -19,30 +16,25 @@ function App() {
   // Check which worlds have tiles on mount
   useEffect(() => {
     const checkWorlds = async () => {
-      const available: string[] = [];
+      try {
+        const response = await fetch(`${API_URL}/api/worlds`);
+        if (response.ok) {
+          const data = await response.json();
+          const available = data.worlds || ['world'];
 
-      for (const worldName of POSSIBLE_WORLDS) {
-        try {
-          // Try to fetch a tile from zoom 0 at origin (0_0.png)
-          const response = await fetch(`${API_URL}/tiles/${worldName}/0/0_0.png`, {
-            method: 'HEAD' // Use HEAD to avoid downloading the image
-          });
+          setAvailableWorlds(available);
 
-          if (response.ok) {
-            available.push(worldName);
+          // Set initial world to first available if current not in list
+          if (!available.includes(world)) {
+            setWorld(available[0]);
           }
-        } catch (err) {
-          // World doesn't exist or has no tiles
-          console.log(`World ${worldName} not available:`, err);
-        }
-      }
 
-      if (available.length > 0) {
-        setAvailableWorlds(available);
-        // Set initial world to first available
-        if (!available.includes(world)) {
-          setWorld(available[0]);
+          console.log('Available worlds:', available);
         }
+      } catch (err) {
+        console.error('Failed to fetch worlds:', err);
+        // Fallback to just Overworld
+        setAvailableWorlds(['world']);
       }
     };
 

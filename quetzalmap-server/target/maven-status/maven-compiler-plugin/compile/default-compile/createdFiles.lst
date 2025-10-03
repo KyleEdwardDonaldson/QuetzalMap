@@ -1,4 +1,5 @@
 dev/ked/quetzalmap/server/handlers/MarkerHandler.class
+dev/ked/quetzalmap/server/handlers/WorldsHandler.class
 dev/ked/quetzalmap/server/WebServer.class
 dev/ked/quetzalmap/server/sse/SSEConnection.class
 dev/ked/quetzalmap/server/handlers/SSEHandler.class

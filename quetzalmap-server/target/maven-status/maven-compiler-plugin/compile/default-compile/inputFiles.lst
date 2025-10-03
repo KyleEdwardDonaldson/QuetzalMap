@@ -1,5 +1,6 @@
 /var/repos/QuetzalMap/quetzalmap-server/src/main/java/dev/ked/quetzalmap/server/sse/SSEManager.java
 /var/repos/QuetzalMap/quetzalmap-server/src/main/java/dev/ked/quetzalmap/server/WebServer.java
+/var/repos/QuetzalMap/quetzalmap-server/src/main/java/dev/ked/quetzalmap/server/handlers/WorldsHandler.java
 /var/repos/QuetzalMap/quetzalmap-server/src/main/java/dev/ked/quetzalmap/server/handlers/TileHandler.java
 /var/repos/QuetzalMap/quetzalmap-server/src/main/java/dev/ked/quetzalmap/server/handlers/MarkerHandler.java
 /var/repos/QuetzalMap/quetzalmap-server/src/main/java/dev/ked/quetzalmap/server/handlers/SSEHandler.java

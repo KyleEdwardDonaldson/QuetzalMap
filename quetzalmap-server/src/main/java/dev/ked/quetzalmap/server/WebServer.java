@@ -3,6 +3,7 @@ package dev.ked.quetzalmap.server;
 import dev.ked.quetzalmap.server.handlers.SSEHandler;
 import dev.ked.quetzalmap.server.handlers.TileHandler;
 import dev.ked.quetzalmap.server.handlers.MarkerHandler;
+import dev.ked.quetzalmap.server.handlers.WorldsHandler;
 import dev.ked.quetzalmap.server.sse.SSEManager;
 import dev.ked.quetzalmap.web.tiles.TileManager;
 import io.undertow.Undertow;
@@ -58,6 +59,7 @@ public final class WebServer {
             TileHandler tileHandler = new TileHandler(tileManager, tilesDirectory, worldsDirectory);
             SSEHandler sseHandler = new SSEHandler(sseManager);
             MarkerHandler markerHandler = new MarkerHandler();
+            WorldsHandler worldsHandler = new WorldsHandler(worldsDirectory);
             LOGGER.info("Handlers created successfully");
 
             // Build path handler
@@ -65,6 +67,7 @@ public final class WebServer {
                     .addPrefixPath("/tiles", tileHandler)
                     .addPrefixPath("/events", sseHandler)
                     .addPrefixPath("/api/markers", markerHandler)
+                    .addExactPath("/api/worlds", worldsHandler)
                     .addExactPath("/", this::handleRoot)
                     .addExactPath("/health", this::handleHealth);
             LOGGER.info("Path handlers registered");
@@ -96,6 +99,7 @@ public final class WebServer {
             LOGGER.info("  - Tiles:   http://" + host + ":" + port + "/tiles/{world}/{zoom}/{x}_{z}.png");
             LOGGER.info("  - Events:  http://" + host + ":" + port + "/events");
             LOGGER.info("  - Markers: http://" + host + ":" + port + "/api/markers");
+            LOGGER.info("  - Worlds:  http://" + host + ":" + port + "/api/worlds");
             LOGGER.info("  - Health:  http://" + host + ":" + port + "/health");
 
             // Attempt to verify the server is actually listening
@@ -189,6 +193,7 @@ public final class WebServer {
                 "  GET /tiles/{world}/{zoom}/{x}_{z}.png - Map tiles\n" +
                 "  GET /events - Server-Sent Events\n" +
                 "  GET /api/markers - Marker data\n" +
+                "  GET /api/worlds - Available worlds\n" +
                 "  GET /health - Health check\n");
     }
 
