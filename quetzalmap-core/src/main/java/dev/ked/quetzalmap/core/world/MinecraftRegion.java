@@ -43,8 +43,9 @@ public class MinecraftRegion {
     /**
      * Load a chunk from the region file.
      * Uses cache to avoid repeated I/O operations.
+     * Returns null for corrupted/missing chunks instead of throwing exceptions.
      */
-    public MinecraftChunk getChunk(int chunkX, int chunkZ) throws IOException {
+    public MinecraftChunk getChunk(int chunkX, int chunkZ) {
         ChunkPos pos = new ChunkPos(chunkX, chunkZ);
 
         // Try cache first
@@ -66,7 +67,7 @@ public class MinecraftRegion {
         return chunk;
     }
 
-    private MinecraftChunk loadChunk(int chunkX, int chunkZ) throws IOException {
+    private MinecraftChunk loadChunk(int chunkX, int chunkZ) {
         // Calculate chunk position within region (0-31)
         int localX = chunkX & 31;
         int localZ = chunkZ & 31;
@@ -74,10 +75,23 @@ public class MinecraftRegion {
         LOGGER.fine("loadChunk: localX=" + localX + ", localZ=" + localZ);
 
         try (RandomAccessFile raf = new RandomAccessFile(regionFile.toFile(), "r")) {
+            // Check file size - region files should be at least 8KB (header)
+            long fileSize = raf.length();
+            if (fileSize < 8192) {
+                LOGGER.warning("Region file too small or corrupted: " + regionFile + " (size=" + fileSize + " bytes)");
+                return null;
+            }
+
             // Read chunk location from header
             int headerOffset = 4 * ((localX & 31) + (localZ & 31) * 32);
-            raf.seek(headerOffset);
 
+            // Bounds check before seeking
+            if (headerOffset + 4 > fileSize) {
+                LOGGER.warning("Header offset out of bounds for chunk " + chunkX + "," + chunkZ);
+                return null;
+            }
+
+            raf.seek(headerOffset);
             int location = raf.readInt();
             LOGGER.fine("Chunk " + chunkX + "," + chunkZ + " location header: " + location);
             if (location == 0) {
@@ -95,6 +109,12 @@ public class MinecraftRegion {
                 return null;
             }
 
+            // Bounds check chunk offset
+            if (offset < 0 || offset + 5 > fileSize) {
+                LOGGER.warning("Chunk " + chunkX + "," + chunkZ + " offset out of bounds: " + offset + " (fileSize=" + fileSize + ")");
+                return null;
+            }
+
             // Read chunk data
             raf.seek(offset);
             int length = raf.readInt();
@@ -102,8 +122,14 @@ public class MinecraftRegion {
 
             LOGGER.fine("Chunk " + chunkX + "," + chunkZ + " length=" + length + ", compressionType=" + compressionType);
 
-            if (length == 0 || compressionType == 0) {
+            if (length <= 0 || compressionType == 0) {
                 // Invalid chunk data - silently skip
+                return null;
+            }
+
+            // Bounds check for chunk data length
+            if (length > sectorCount * 4096 || offset + length > fileSize) {
+                LOGGER.warning("Chunk " + chunkX + "," + chunkZ + " length out of bounds: " + length + " bytes");
                 return null;
             }
 
@@ -133,6 +159,19 @@ public class MinecraftRegion {
                 LOGGER.fine("NBT data read successfully, creating MinecraftChunk...");
                 return new MinecraftChunk(root, chunkX, chunkZ);
             }
+
+        } catch (java.io.EOFException e) {
+            // Corrupted or truncated region file - log and skip
+            LOGGER.warning("Corrupted region file, chunk " + chunkX + "," + chunkZ + " truncated: " + regionFile);
+            return null;
+        } catch (IOException e) {
+            // Other I/O errors - log and skip
+            LOGGER.warning("Failed to load chunk " + chunkX + "," + chunkZ + ": " + e.getMessage());
+            return null;
+        } catch (Exception e) {
+            // NBT parsing errors - log and skip
+            LOGGER.warning("Failed to parse chunk " + chunkX + "," + chunkZ + ": " + e.getMessage());
+            return null;
         }
     }
 

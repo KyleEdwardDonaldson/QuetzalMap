@@ -59,10 +59,9 @@ public class RegionCache {
      * @param worldDir World directory containing region files
      * @param regionX Region X coordinate
      * @param regionZ Region Z coordinate
-     * @return MinecraftRegion instance (cached or newly loaded)
-     * @throws IOException if region file cannot be read
+     * @return MinecraftRegion instance (cached or newly loaded), never null
      */
-    public MinecraftRegion getRegion(Path worldDir, int regionX, int regionZ) throws IOException {
+    public MinecraftRegion getRegion(Path worldDir, int regionX, int regionZ) {
         RegionKey key = new RegionKey(worldDir.toString(), regionX, regionZ);
 
         MinecraftRegion region = cache.getIfPresent(key);
