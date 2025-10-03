@@ -1,0 +1,144 @@
+# QuetzalMap Configuration
+
+# Map Settings
+map:
+  # Should players automatically receive a map on join?
+  auto-give-on-join: true
+
+  # Map radius in blocks from center
+  map-radius: 1024
+
+  # Update rate in ticks (1 = every tick, 20 = once per second)
+  update-rate: 1
+
+  # Available zoom levels (in blocks)
+  zoom-levels:
+    - 512
+    - 1024
+    - 2048
+    - 4096
+
+  # Default zoom level for new players
+  default-zoom: 1024
+
+# Marker Settings
+markers:
+  # Storm markers (from Stormcraft)
+  storms:
+    enabled: true
+    show-direction: true
+    show-radius: true
+    show-distance: true
+    color: RED
+    # Overlay settings for storm circles
+    overlay-color: "#FF0000"  # Hex color for storm overlay (fill)
+    overlay-opacity: 0.3  # Transparency (0.0 = invisible, 1.0 = solid)
+    border-color: "#FF0000"  # Hex color for storm border (outline)
+    border-thickness: 2  # Thickness of the border outline in pixels
+    direction-arrow-color: "#FFFF00"  # Yellow for direction arrows
+    arrow-opacity: 0.8
+
+  # Shop markers (from BetterShop)
+  shops:
+    enabled: true
+    color: GREEN
+    only-active: true  # Only show active shop listings
+    group-by-owner: false  # If true, show only one marker per shop owner
+    max-shops: 100  # Maximum number of shop markers to display
+    # Marker types based on listing type:
+    # BUY shops: Green pointer (players can buy from these)
+    # SELL shops: Red pointer (players can sell to these)
+    # BARTER shops: Blue pointer (item exchange shops)
+
+  # Transporter markers (from SilkRoad)
+  transporters:
+    enabled: true
+    color: BLUE
+
+  # Trade post markers (from SilkRoad)
+  trade-posts:
+    enabled: true
+    color: YELLOW
+
+  # Event markers (from StormcraftEvents)
+  events:
+    enabled: true
+    color: PURPLE
+
+  # Dungeon markers (from StormcraftDungeons)
+  dungeons:
+    enabled: true
+    color: DARK_RED
+
+  # Towny town markers
+  towns:
+    enabled: true
+    # Show town spawn points
+    show-spawn: true
+    # Show town names
+    show-names: true
+    # Show town boundaries (homeblocks)
+    show-boundaries: true
+    # Color for town markers
+    color: GREEN
+    # Only show towns the player is a resident of
+    only-show-own: false
+    # Maximum number of towns to display
+    max-towns: 100
+
+  # Towny nation markers
+  nations:
+    enabled: true
+    # Show nation capital locations
+    show-capital: true
+    # Show nation names
+    show-names: true
+    # Color for nation markers
+    color: BLUE
+    # Only show nations the player is part of
+    only-show-own: false
+    # Maximum number of nations to display
+    max-nations: 50
+
+# Integration Settings
+integrations:
+  # Stormcraft integration
+  stormcraft:
+    enabled: true
+    update-interval: 20  # ticks
+
+  # BetterShop integration
+  bettershop:
+    enabled: true
+    update-interval: 200  # ticks (10 seconds)
+
+  # SilkRoad integration
+  silkroad:
+    enabled: true
+
+  # StormcraftEvents integration
+  stormcraft-events:
+    enabled: true
+
+  # StormcraftDungeons integration
+  stormcraft-dungeons:
+    enabled: true
+
+  # Towny integration
+  towny:
+    enabled: true
+    update-interval: 100  # ticks (towns/nations don't change often)
+
+# Performance Settings
+performance:
+  # Render maps asynchronously to reduce main thread lag
+  async-rendering: true
+
+  # Cache terrain data to reduce re-rendering
+  cache-terrain: true
+
+  # Maximum markers to display per map
+  max-markers-per-map: 500
+
+  # Maximum distance to render markers (in blocks)
+  max-marker-distance: 5000

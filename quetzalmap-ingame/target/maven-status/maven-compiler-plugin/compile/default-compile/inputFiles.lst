@@ -1,0 +1,15 @@
+/var/repos/QuetzalMap/quetzalmap-ingame/src/main/java/dev/ked/quetzalmap/ingame/model/PlayerMapData.java
+/var/repos/QuetzalMap/quetzalmap-ingame/src/main/java/dev/ked/quetzalmap/ingame/manager/MapManager.java
+/var/repos/QuetzalMap/quetzalmap-ingame/src/main/java/dev/ked/quetzalmap/ingame/integration/Integration.java
+/var/repos/QuetzalMap/quetzalmap-ingame/src/main/java/dev/ked/quetzalmap/ingame/QuetzalMapPlugin.java
+/var/repos/QuetzalMap/quetzalmap-ingame/src/main/java/dev/ked/quetzalmap/ingame/model/MarkerType.java
+/var/repos/QuetzalMap/quetzalmap-ingame/src/main/java/dev/ked/quetzalmap/ingame/listener/PlayerListener.java
+/var/repos/QuetzalMap/quetzalmap-ingame/src/main/java/dev/ked/quetzalmap/ingame/renderer/QuetzalMapRenderer.java
+/var/repos/QuetzalMap/quetzalmap-ingame/src/main/java/dev/ked/quetzalmap/ingame/manager/PlayerDataManager.java
+/var/repos/QuetzalMap/quetzalmap-ingame/src/main/java/dev/ked/quetzalmap/ingame/integration/StormcraftIntegration.java
+/var/repos/QuetzalMap/quetzalmap-ingame/src/main/java/dev/ked/quetzalmap/ingame/manager/MarkerManager.java
+/var/repos/QuetzalMap/quetzalmap-ingame/src/main/java/dev/ked/quetzalmap/ingame/integration/TownyIntegration.java
+/var/repos/QuetzalMap/quetzalmap-ingame/src/main/java/dev/ked/quetzalmap/ingame/integration/BetterShopIntegration.java
+/var/repos/QuetzalMap/quetzalmap-ingame/src/main/java/dev/ked/quetzalmap/ingame/commands/MapCommand.java
+/var/repos/QuetzalMap/quetzalmap-ingame/src/main/java/dev/ked/quetzalmap/ingame/model/Marker.java
+/var/repos/QuetzalMap/quetzalmap-ingame/src/main/java/dev/ked/quetzalmap/ingame/integration/IntegrationManager.java

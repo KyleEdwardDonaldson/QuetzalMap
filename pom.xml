@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>dev.ked</groupId>
+    <artifactId>quetzalmap-parent</artifactId>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+
+    <name>QuetzalMap Parent</name>
+    <description>High-performance web and in-game map for Minecraft servers</description>
+
+    <modules>
+        <module>quetzalmap-core</module>
+        <module>quetzalmap-ingame</module>
+        <module>quetzalmap-web</module>
+        <module>quetzalmap-server</module>
+        <module>quetzalmap-paper</module>
+    </modules>
+
+    <properties>
+        <java.version>21</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!-- Dependency versions -->
+        <paper.version>1.21.3-R0.1-SNAPSHOT</paper.version>
+        <worldguard.version>7.0.9</worldguard.version>
+        <towny.version>0.100.3.0</towny.version>
+        <caffeine.version>3.1.8</caffeine.version>
+        <undertow.version>2.3.17.Final</undertow.version>
+        <gson.version>2.11.0</gson.version>
+        <nbt.version>6.1</nbt.version>
+        <lz4.version>1.8.0</lz4.version>
+        <slf4j.version>2.0.9</slf4j.version>
+        <jspecify.version>1.0.0</jspecify.version>
+    </properties>
+
+    <repositories>
+        <repository>
+            <id>papermc-repo</id>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
+        </repository>
+        <repository>
+            <id>enginehub-maven</id>
+            <url>https://maven.enginehub.org/repo/</url>
+        </repository>
+        <repository>
+            <id>glaremasters-repo</id>
+            <url>https://repo.glaremasters.me/repository/towny/</url>
+        </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Paper API -->
+            <dependency>
+                <groupId>io.papermc.paper</groupId>
+                <artifactId>paper-api</artifactId>
+                <version>${paper.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <!-- WorldGuard -->
+            <dependency>
+                <groupId>com.sk89q.worldguard</groupId>
+                <artifactId>worldguard-bukkit</artifactId>
+                <version>${worldguard.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <!-- Towny -->
+            <dependency>
+                <groupId>com.palmergames.bukkit.towny</groupId>
+                <artifactId>towny</artifactId>
+                <version>${towny.version}</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <!-- NBT parsing library for Minecraft data -->
+            <dependency>
+                <groupId>com.github.Querz</groupId>
+                <artifactId>NBT</artifactId>
+                <version>${nbt.version}</version>
+            </dependency>
+
+            <!-- LZ4 compression (for chunk parsing) -->
+            <dependency>
+                <groupId>org.lz4</groupId>
+                <artifactId>lz4-java</artifactId>
+                <version>${lz4.version}</version>
+            </dependency>
+
+            <!-- Caffeine cache -->
+            <dependency>
+                <groupId>com.github.ben-manes.caffeine</groupId>
+                <artifactId>caffeine</artifactId>
+                <version>${caffeine.version}</version>
+            </dependency>
+
+            <!-- Undertow web server -->
+            <dependency>
+                <groupId>io.undertow</groupId>
+                <artifactId>undertow-core</artifactId>
+                <version>${undertow.version}</version>
+            </dependency>
+
+            <!-- Gson for JSON -->
+            <dependency>
+                <groupId>com.google.code.gson</groupId>
+                <artifactId>gson</artifactId>
+                <version>${gson.version}</version>
+            </dependency>
+
+            <!-- Logging -->
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+
+            <!-- JSpecify annotations -->
+            <dependency>
+                <groupId>org.jspecify</groupId>
+                <artifactId>jspecify</artifactId>
+                <version>${jspecify.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.11.0</version>
+                    <configuration>
+                        <source>${java.version}</source>
+                        <target>${java.version}</target>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>3.5.0</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+</project>

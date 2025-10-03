@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>dev.ked</groupId>
+        <artifactId>quetzalmap-parent</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
+    <artifactId>quetzalmap-paper</artifactId>
+    <packaging>jar</packaging>
+
+    <name>QuetzalMap Paper Plugin</name>
+    <description>Complete QuetzalMap plugin combining in-game and web map</description>
+
+    <dependencies>
+        <!-- All modules -->
+        <dependency>
+            <groupId>dev.ked</groupId>
+            <artifactId>quetzalmap-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>dev.ked</groupId>
+            <artifactId>quetzalmap-ingame</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>dev.ked</groupId>
+            <artifactId>quetzalmap-web</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>dev.ked</groupId>
+            <artifactId>quetzalmap-server</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- Paper API -->
+        <dependency>
+            <groupId>io.papermc.paper</groupId>
+            <artifactId>paper-api</artifactId>
+        </dependency>
+
+        <!-- Soft dependencies -->
+        <dependency>
+            <groupId>com.sk89q.worldguard</groupId>
+            <artifactId>worldguard-bukkit</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.palmergames.bukkit.towny</groupId>
+            <artifactId>towny</artifactId>
+        </dependency>
+
+        <!-- Custom plugins -->
+        <dependency>
+            <groupId>dev.ked</groupId>
+            <artifactId>stormcraft</artifactId>
+            <version>0.1.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/../../Stormcraft/target/stormcraft-0.1.0.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>dev.ked</groupId>
+            <artifactId>bettershop</artifactId>
+            <version>1.0.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/../../BetterShop/target/BetterShop-1.0.0.jar</systemPath>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>QuetzalMap-${project.version}</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+    </build>
+</project>

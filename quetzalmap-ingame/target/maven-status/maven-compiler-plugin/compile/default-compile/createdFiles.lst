@@ -1,0 +1,15 @@
+dev/ked/quetzalmap/renderer/QuetzalMapRenderer.class
+dev/ked/quetzalmap/manager/MapManager.class
+dev/ked/quetzalmap/model/PlayerMapData.class
+dev/ked/quetzalmap/integration/IntegrationManager.class
+dev/ked/quetzalmap/integration/Integration.class
+dev/ked/quetzalmap/integration/TownyIntegration.class
+dev/ked/quetzalmap/integration/StormcraftIntegration.class
+dev/ked/quetzalmap/listener/PlayerListener.class
+dev/ked/quetzalmap/manager/MarkerManager.class
+dev/ked/quetzalmap/QuetzalMapPlugin.class
+dev/ked/quetzalmap/commands/MapCommand.class
+dev/ked/quetzalmap/model/MarkerType.class
+dev/ked/quetzalmap/manager/PlayerDataManager.class
+dev/ked/quetzalmap/integration/BetterShopIntegration.class
+dev/ked/quetzalmap/model/Marker.class

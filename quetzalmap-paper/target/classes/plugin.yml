@@ -1,0 +1,34 @@
+name: QuetzalMap
+version: 1.0.0
+main: dev.ked.quetzalmap.QuetzalMapPlugin
+api-version: '1.21'
+description: High-performance web and in-game map with live integrations
+author: Kyle Edward Donaldson
+website: https://ked.dev
+
+softdepend:
+  - WorldGuard
+  - Towny
+  - Stormcraft
+  - BetterShop
+  - SilkRoad
+
+commands:
+  qmap:
+    description: QuetzalMap main command
+    usage: /qmap [info|reload|stats]
+    permission: quetzalmap.use
+
+permissions:
+  quetzalmap.*:
+    description: All QuetzalMap permissions
+    default: op
+    children:
+      quetzalmap.use: true
+      quetzalmap.admin: true
+  quetzalmap.use:
+    description: Basic map usage
+    default: true
+  quetzalmap.admin:
+    description: Admin commands
+    default: op

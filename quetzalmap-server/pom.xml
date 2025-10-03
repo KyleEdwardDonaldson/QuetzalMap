@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>dev.ked</groupId>
+        <artifactId>quetzalmap-parent</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
+    <artifactId>quetzalmap-server</artifactId>
+    <packaging>jar</packaging>
+
+    <name>QuetzalMap Server</name>
+    <description>HTTP server with SSE for web map</description>
+
+    <dependencies>
+        <!-- Core module -->
+        <dependency>
+            <groupId>dev.ked</groupId>
+            <artifactId>quetzalmap-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- Web module -->
+        <dependency>
+            <groupId>dev.ked</groupId>
+            <artifactId>quetzalmap-web</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- Undertow web server -->
+        <dependency>
+            <groupId>io.undertow</groupId>
+            <artifactId>undertow-core</artifactId>
+        </dependency>
+
+        <!-- Gson for JSON -->
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+        </dependency>
+
+        <!-- Logging -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>

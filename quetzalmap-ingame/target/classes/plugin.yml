@@ -1,0 +1,90 @@
+name: QuetzalMap
+version: '${project.version}'
+main: dev.ked.quetzalmap.QuetzalMapPlugin
+api-version: '1.21'
+author: Kyle Edward Donaldson
+description: Custom minimap plugin with WorldGuard and Towny support
+softdepend: [WorldGuard, Towny, Stormcraft, BetterShop, SilkRoad, StormcraftEvents, StormcraftDungeons]
+
+commands:
+  qmap:
+    description: Main QuetzalMap command
+    usage: |-
+      /qmap - Show map info
+      /qmap toggle <marker-type> - Toggle marker visibility
+      /qmap zoom <level> - Change map zoom level
+      /qmap reload - Reload configuration
+      /qmap give <player> - Give map to player
+    aliases: [quetzalmap, map]
+
+permissions:
+  quetzalmap.*:
+    description: All QuetzalMap permissions
+    default: op
+    children:
+      quetzalmap.use: true
+      quetzalmap.toggle: true
+      quetzalmap.zoom: true
+      quetzalmap.admin: true
+      quetzalmap.markers.*: true
+
+  quetzalmap.use:
+    description: Basic map usage
+    default: true
+
+  quetzalmap.toggle:
+    description: Toggle marker types
+    default: true
+
+  quetzalmap.zoom:
+    description: Change zoom levels
+    default: true
+
+  quetzalmap.admin:
+    description: Admin commands (reload, give)
+    default: op
+
+  quetzalmap.markers.*:
+    description: See all marker types
+    default: true
+    children:
+      quetzalmap.markers.storms: true
+      quetzalmap.markers.shops: true
+      quetzalmap.markers.transporters: true
+      quetzalmap.markers.events: true
+      quetzalmap.markers.dungeons: true
+      quetzalmap.markers.regions: true
+      quetzalmap.markers.towns: true
+      quetzalmap.markers.nations: true
+
+  quetzalmap.markers.storms:
+    description: See storm markers
+    default: true
+
+  quetzalmap.markers.shops:
+    description: See shop markers
+    default: true
+
+  quetzalmap.markers.transporters:
+    description: See transporter markers
+    default: true
+
+  quetzalmap.markers.events:
+    description: See event markers
+    default: true
+
+  quetzalmap.markers.dungeons:
+    description: See dungeon markers
+    default: true
+
+  quetzalmap.markers.regions:
+    description: See WorldGuard region markers
+    default: true
+
+  quetzalmap.markers.towns:
+    description: See Towny town markers
+    default: true
+
+  quetzalmap.markers.nations:
+    description: See Towny nation markers
+    default: true

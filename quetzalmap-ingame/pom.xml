@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>dev.ked</groupId>
+        <artifactId>quetzalmap-parent</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
+    <artifactId>quetzalmap-ingame</artifactId>
+    <packaging>jar</packaging>
+
+    <name>QuetzalMap In-Game</name>
+    <description>In-game map using Bukkit MapView with live markers</description>
+
+    <dependencies>
+        <!-- Core module -->
+        <dependency>
+            <groupId>dev.ked</groupId>
+            <artifactId>quetzalmap-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- Paper API -->
+        <dependency>
+            <groupId>io.papermc.paper</groupId>
+            <artifactId>paper-api</artifactId>
+        </dependency>
+
+        <!-- WorldGuard -->
+        <dependency>
+            <groupId>com.sk89q.worldguard</groupId>
+            <artifactId>worldguard-bukkit</artifactId>
+        </dependency>
+
+        <!-- Towny -->
+        <dependency>
+            <groupId>com.palmergames.bukkit.towny</groupId>
+            <artifactId>towny</artifactId>
+        </dependency>
+
+        <!-- Stormcraft -->
+        <dependency>
+            <groupId>dev.ked</groupId>
+            <artifactId>stormcraft</artifactId>
+            <version>0.1.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/../../Stormcraft/target/stormcraft-0.1.0.jar</systemPath>
+        </dependency>
+
+        <!-- BetterShop -->
+        <dependency>
+            <groupId>dev.ked</groupId>
+            <artifactId>bettershop</artifactId>
+            <version>1.0.0</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/../../BetterShop/target/BetterShop-1.0.0.jar</systemPath>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>
