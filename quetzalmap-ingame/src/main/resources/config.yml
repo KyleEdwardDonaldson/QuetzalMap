@@ -38,7 +38,7 @@ markers:
     direction-arrow-color: "#FFFF00"  # Yellow for direction arrows
     arrow-opacity: 0.8
 
-  # Shop markers (from BetterShop)
+  # Shop markers (from Bazaar)
   shops:
     enabled: true
     color: GREEN
@@ -107,8 +107,8 @@ integrations:
     enabled: true
     update-interval: 20  # ticks
 
-  # BetterShop integration
-  bettershop:
+  # Bazaar integration
+  bazaar:
     enabled: true
     update-interval: 200  # ticks (10 seconds)
 

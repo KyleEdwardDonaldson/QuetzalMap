@@ -1,5 +1,8 @@
-dev/ked/quetzalmap/core/world/MinecraftRegion$ChunkPos.class
+dev/ked/quetzalmap/core/world/RegionCache.class
 dev/ked/quetzalmap/core/world/MinecraftChunk.class
 dev/ked/quetzalmap/core/world/BlockState.class
+dev/ked/quetzalmap/core/world/RegionCache$CacheStats.class
+dev/ked/quetzalmap/core/world/RegionCache$RegionKey.class
+dev/ked/quetzalmap/core/world/MinecraftRegion$ChunkPos.class
 dev/ked/quetzalmap/core/world/BlockType.class
 dev/ked/quetzalmap/core/world/MinecraftRegion.class

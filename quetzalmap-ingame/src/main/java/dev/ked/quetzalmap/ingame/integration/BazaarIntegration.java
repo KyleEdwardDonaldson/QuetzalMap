@@ -1,10 +1,10 @@
 package dev.ked.quetzalmap.integration;
 
-import dev.ked.bettershop.BetterShopPlugin;
-import dev.ked.bettershop.shop.Listing;
-import dev.ked.bettershop.shop.ListingType;
-import dev.ked.bettershop.shop.ShopEntity;
-import dev.ked.bettershop.shop.ShopRegistry;
+import dev.ked.bazaar.BazaarPlugin;
+import dev.ked.bazaar.shop.Listing;
+import dev.ked.bazaar.shop.ListingType;
+import dev.ked.bazaar.shop.ShopEntity;
+import dev.ked.bazaar.shop.ShopRegistry;
 import dev.ked.quetzalmap.QuetzalMapPlugin;
 import dev.ked.quetzalmap.model.Marker;
 import dev.ked.quetzalmap.model.MarkerType;
@@ -18,38 +18,38 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
-public class BetterShopIntegration implements Integration {
+public class BazaarIntegration implements Integration {
 
     private final QuetzalMapPlugin plugin;
-    private BetterShopPlugin betterShopPlugin;
+    private BazaarPlugin betterShopPlugin;
     private BukkitTask updateTask;
     private boolean initialized = false;
 
-    public BetterShopIntegration(QuetzalMapPlugin plugin) {
+    public BazaarIntegration(QuetzalMapPlugin plugin) {
         this.plugin = plugin;
     }
 
     @Override
     public boolean initialize() {
         try {
-            // Get BetterShop plugin instance
-            Plugin betterShopBukkit = Bukkit.getPluginManager().getPlugin("BetterShop");
-            if (betterShopBukkit == null || !(betterShopBukkit instanceof BetterShopPlugin)) {
-                plugin.getLogger().warning("BetterShop plugin not found");
+            // Get Bazaar plugin instance
+            Plugin betterShopBukkit = Bukkit.getPluginManager().getPlugin("Bazaar");
+            if (betterShopBukkit == null || !(betterShopBukkit instanceof BazaarPlugin)) {
+                plugin.getLogger().warning("Bazaar plugin not found");
                 return false;
             }
 
-            betterShopPlugin = (BetterShopPlugin) betterShopBukkit;
+            betterShopPlugin = (BazaarPlugin) betterShopBukkit;
 
             // Start periodic marker updates
-            int updateInterval = plugin.getConfig().getInt("integrations.bettershop.update-interval", 200);
+            int updateInterval = plugin.getConfig().getInt("integrations.bazaar.update-interval", 200);
             updateTask = Bukkit.getScheduler().runTaskTimer(plugin, this::updateMarkers, 20L, updateInterval);
 
             initialized = true;
-            plugin.getLogger().info("BetterShop integration initialized");
+            plugin.getLogger().info("Bazaar integration initialized");
             return true;
         } catch (Exception e) {
-            plugin.getLogger().warning("Failed to initialize BetterShop integration: " + e.getMessage());
+            plugin.getLogger().warning("Failed to initialize Bazaar integration: " + e.getMessage());
             e.printStackTrace();
             return false;
         }
@@ -69,7 +69,7 @@ public class BetterShopIntegration implements Integration {
 
     @Override
     public String getName() {
-        return "BetterShop";
+        return "Bazaar";
     }
 
     @Override
@@ -170,7 +170,7 @@ public class BetterShopIntegration implements Integration {
         }
 
         if (shopCount > 0) {
-            plugin.getLogger().fine("Updated " + shopCount + " BetterShop markers");
+            plugin.getLogger().fine("Updated " + shopCount + " Bazaar markers");
         }
     }
 }

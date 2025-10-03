@@ -4,7 +4,7 @@ main: dev.ked.quetzalmap.QuetzalMapPlugin
 api-version: '1.21'
 author: Kyle Edward Donaldson
 description: Custom minimap plugin with WorldGuard and Towny support
-softdepend: [WorldGuard, Towny, Stormcraft, BetterShop, SilkRoad, StormcraftEvents, StormcraftDungeons]
+softdepend: [WorldGuard, Towny, Stormcraft, Bazaar, SilkRoad, StormcraftEvents, StormcraftDungeons]
 
 commands:
   qmap:

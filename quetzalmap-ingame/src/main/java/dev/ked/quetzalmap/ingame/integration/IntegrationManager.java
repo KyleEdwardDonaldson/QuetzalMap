@@ -26,12 +26,12 @@ public class IntegrationManager {
             }
         }
 
-        // BetterShop Integration
-        if (isPluginEnabled("BetterShop") && plugin.getConfig().getBoolean("integrations.bettershop.enabled", true)) {
-            BetterShopIntegration shopIntegration = new BetterShopIntegration(plugin);
+        // Bazaar Integration
+        if (isPluginEnabled("Bazaar") && plugin.getConfig().getBoolean("integrations.bazaar.enabled", true)) {
+            BazaarIntegration shopIntegration = new BazaarIntegration(plugin);
             if (shopIntegration.initialize()) {
                 integrations.add(shopIntegration);
-                plugin.getLogger().info("BetterShop integration enabled!");
+                plugin.getLogger().info("Bazaar integration enabled!");
             }
         }
 

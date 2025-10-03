@@ -10,7 +10,7 @@ softdepend:
   - WorldGuard
   - Towny
   - Stormcraft
-  - BetterShop
+  - Bazaar
   - SilkRoad
 
 commands:

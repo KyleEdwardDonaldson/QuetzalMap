@@ -3,6 +3,7 @@ package dev.ked.quetzalmap.web.rendering;
 import dev.ked.quetzalmap.core.world.BlockState;
 import dev.ked.quetzalmap.core.world.MinecraftChunk;
 import dev.ked.quetzalmap.core.world.MinecraftRegion;
+import dev.ked.quetzalmap.core.world.RegionCache;
 import dev.ked.quetzalmap.web.pool.ChunkPixelData;
 import dev.ked.quetzalmap.web.pool.ChunkPixelDataPool;
 import dev.ked.quetzalmap.web.tiles.Tile;
@@ -48,8 +49,9 @@ public final class TileRenderer {
                 return tile;
             }
 
-            // Load region
-            MinecraftRegion region = new MinecraftRegion(regionFile, regionX, regionZ);
+            // Load region from cache (major performance optimization)
+            // Avoids repeated I/O + NBT parsing for same region
+            MinecraftRegion region = RegionCache.getInstance().getRegion(worldDirectory, regionX, regionZ);
             renderRegionToTile(region, tile);
 
             tile.markClean();

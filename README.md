@@ -18,7 +18,7 @@ QuetzalMap is a high-performance map rendering plugin that provides a modern web
 
 ### Plugin Integrations (Planned)
 - **Stormcraft** - Live storm tracking with movement indicators
-- **BetterShop** - Shop location markers
+- **Bazaar** - Shop location markers
 - **SilkRoad** - Transporter stations and trade posts
 - **WorldGuard** - Region visualization
 - **Towny** - Town and nation boundaries
@@ -145,7 +145,7 @@ ls -lh QuetzalMap-1.0.0.jar
 - Connection status indicator
 
 ### 🚧 In Development
-- Plugin integration markers (Stormcraft, BetterShop, SilkRoad)
+- Plugin integration markers (Stormcraft, Bazaar, SilkRoad)
 - Multiple zoom level rendering
 - Chunk change detection and incremental updates
 - Player position tracking

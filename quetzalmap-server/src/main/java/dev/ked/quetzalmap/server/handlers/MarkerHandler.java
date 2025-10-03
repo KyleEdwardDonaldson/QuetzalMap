@@ -53,7 +53,7 @@ public final class MarkerHandler implements HttpHandler {
 
     /**
      * Build markers JSON response.
-     * TODO: Integrate with Stormcraft, BetterShop, etc.
+     * TODO: Integrate with Stormcraft, Bazaar, etc.
      */
     private String buildMarkersJson() {
         return """

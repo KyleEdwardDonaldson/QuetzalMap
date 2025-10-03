@@ -22,7 +22,7 @@ QuetzalMap is a custom minimap plugin for the Quetzal server that provides playe
 ### 3. Marker Types
 All markers should be toggleable via player preferences:
 - **Storms**: Active storm positions with direction indicators
-- **Shops**: BetterShop locations
+- **Shops**: Bazaar locations
 - **Transporters**: SilkRoad transporter stations
 - **Trade Posts**: SilkRoad trade post locations
 - **Dungeons**: StormcraftDungeons entry points
@@ -57,7 +57,7 @@ All markers should be toggleable via player preferences:
 - StormType getStormType(Storm storm)
 ```
 
-### BetterShop Integration
+### Bazaar Integration
 **Purpose**: Show shop locations on the map
 
 **Integration Points**:
@@ -73,7 +73,7 @@ All markers should be toggleable via player preferences:
 
 **API Requirements**:
 ```java
-// Need from BetterShop:
+// Need from Bazaar:
 - List<Shop> getAllShops()
 - Location getShopLocation(Shop shop)
 - String getShopName(Shop shop)
@@ -234,7 +234,7 @@ quetzalmap:
     stormcraft:
       enabled: true
       update-interval: 20  # ticks
-    bettershop:
+    bazaar:
       enabled: true
       max-shops-displayed: 100
     silkroad:
@@ -275,7 +275,7 @@ quetzalmap:
 5. Add storm radius visualization
 
 ### Phase 4: Shop & Economy Integrations
-1. Create BetterShop integration module
+1. Create Bazaar integration module
 2. Implement shop marker system
 3. Create SilkRoad integration module
 4. Add transporter markers
@@ -356,7 +356,7 @@ public interface QuetzalMapAPI {
 
 ### Soft Dependencies (Integrations)
 - Stormcraft (for storm markers)
-- BetterShop (for shop markers)
+- Bazaar (for shop markers)
 - SilkRoad (for transporter/trade post markers)
 - StormcraftEvents (for event markers)
 - StormcraftDungeons (for dungeon markers)
@@ -428,7 +428,7 @@ Use Minecraft map colors for consistency:
 
 ### Test Cases
 1. **Stormcraft**: Create test storms, verify marker position/movement
-2. **BetterShop**: Create/delete shops, verify markers appear/disappear
+2. **Bazaar**: Create/delete shops, verify markers appear/disappear
 3. **SilkRoad**: Test transporter/trade post markers
 4. **StormcraftEvents**: Start/stop events, verify markers
 5. **StormcraftDungeons**: Test dungeon markers and status updates

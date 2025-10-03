@@ -1,5 +1,7 @@
 package dev.ked.quetzalmap.core.world;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import net.querz.nbt.io.NBTInputStream;
 import net.querz.nbt.io.NamedTag;
 import net.querz.nbt.tag.CompoundTag;
@@ -7,20 +9,29 @@ import net.querz.nbt.tag.CompoundTag;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 /**
  * Reads Minecraft region files (.mca format).
  * Anvil region file parser for efficient chunk loading.
+ *
+ * Performance: Uses bounded Caffeine cache to prevent memory leaks.
+ * Maximum 256 chunks cached per region (~16MB), expires after 5 minutes.
  */
 public class MinecraftRegion {
     private static final Logger LOGGER = Logger.getLogger(MinecraftRegion.class.getName());
+    private static final int MAX_CHUNKS_PER_REGION = 256; // 16x16 area, ~16MB
+
     private final Path regionFile;
     private final int regionX;
     private final int regionZ;
-    private final Map<ChunkPos, MinecraftChunk> chunks = new HashMap<>();
+
+    // Bounded cache prevents memory leaks from unbounded HashMap
+    private final Cache<ChunkPos, MinecraftChunk> chunks = Caffeine.newBuilder()
+            .maximumSize(MAX_CHUNKS_PER_REGION)
+            .expireAfterAccess(5, TimeUnit.MINUTES)
+            .build();
 
     public MinecraftRegion(Path regionFile, int regionX, int regionZ) {
         this.regionFile = regionFile;
@@ -31,15 +42,19 @@ public class MinecraftRegion {
 
     /**
      * Load a chunk from the region file.
+     * Uses cache to avoid repeated I/O operations.
      */
     public MinecraftChunk getChunk(int chunkX, int chunkZ) throws IOException {
         ChunkPos pos = new ChunkPos(chunkX, chunkZ);
 
-        if (chunks.containsKey(pos)) {
+        // Try cache first
+        MinecraftChunk cached = chunks.getIfPresent(pos);
+        if (cached != null) {
             LOGGER.fine("Chunk " + chunkX + "," + chunkZ + " found in cache");
-            return chunks.get(pos);
+            return cached;
         }
 
+        // Cache miss - load from disk
         LOGGER.fine("Loading chunk " + chunkX + "," + chunkZ + " from region file...");
         MinecraftChunk chunk = loadChunk(chunkX, chunkZ);
         if (chunk != null) {
