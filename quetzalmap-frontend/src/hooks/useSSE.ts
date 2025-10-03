@@ -52,7 +52,13 @@ export function useSSE(url: string, enabled: boolean = true) {
           const data = JSON.parse(event.data);
           console.log(`[SSE] Event: ${type}`, data);
 
-          setEvents(prev => [...prev, { type, data }]);
+          // Use circular buffer to prevent memory leak
+          // Keep last 100 events only
+          const MAX_EVENTS = 100;
+          setEvents(prev => {
+            const updated = [...prev, { type, data }];
+            return updated.slice(-MAX_EVENTS);
+          });
         } catch (err) {
           console.error(`[SSE] Failed to parse ${type} event:`, err);
         }

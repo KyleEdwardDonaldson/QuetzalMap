@@ -1,5 +1,5 @@
 import { MapContainer, TileLayer, useMapEvents } from 'react-leaflet';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import ScaleBar from './ScaleBar';
@@ -46,16 +46,45 @@ function ZoomTracker({ onZoomChange }: { onZoomChange: (zoom: number) => void })
 
 /**
  * QuetzalMap tile layer component
- * Fetches tiles from the backend server
+ * Fetches tiles from the backend server with smart buffering
  */
 function QuetzalTileLayer({ apiUrl, world }: { apiUrl: string; world: string }) {
   const [currentZoom, setCurrentZoom] = useState(0);
+  const [viewportSize, setViewportSize] = useState({ width: window.innerWidth, height: window.innerHeight });
 
-  // Calculate keepBuffer based on zoom level
-  // More zoomed out (negative zoom) = need more buffer
-  const keepBuffer = currentZoom <= -3 ? 32 :
-                     currentZoom <= -2 ? 24 :
-                     currentZoom <= -1 ? 16 : 8;
+  // Track viewport size changes
+  useEffect(() => {
+    const handleResize = () => {
+      setViewportSize({ width: window.innerWidth, height: window.innerHeight });
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Calculate dynamic keepBuffer based on viewport and zoom
+  // Prevents wasted bandwidth on small screens, ensures smooth panning on large screens
+  const calculateKeepBuffer = () => {
+    const tilesX = Math.ceil(viewportSize.width / 512);
+    const tilesY = Math.ceil(viewportSize.height / 512);
+    const viewportTiles = tilesX * tilesY;
+
+    // Base buffer: 1.5x viewport size
+    let buffer = Math.ceil(viewportTiles * 1.5);
+
+    // Increase buffer when zoomed out (more tiles visible at once)
+    if (currentZoom <= -3) {
+      buffer = Math.ceil(buffer * 2.5); // 2.5x multiplier
+    } else if (currentZoom <= -2) {
+      buffer = Math.ceil(buffer * 2.0); // 2x multiplier
+    } else if (currentZoom <= -1) {
+      buffer = Math.ceil(buffer * 1.5); // 1.5x multiplier
+    }
+
+    // Cap at reasonable maximum to prevent excessive preloading
+    return Math.min(buffer, 48);
+  };
+
+  const keepBuffer = calculateKeepBuffer();
 
   return (
     <>
