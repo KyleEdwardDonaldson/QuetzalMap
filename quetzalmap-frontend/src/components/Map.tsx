@@ -66,7 +66,7 @@ export default function Map({
       zoom={zoom}
       className="w-full h-full"
       crs={QuetzalCRS}
-      minZoom={0}
+      minZoom={-3}
       maxZoom={3}
     >
       <QuetzalTileLayer apiUrl={apiUrl} world={world} />
