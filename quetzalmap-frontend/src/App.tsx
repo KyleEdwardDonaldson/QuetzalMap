@@ -6,7 +6,6 @@ import { useSSE } from './hooks/useSSE';
 // API URL configuration
 // Use direct backend URL for both dev and prod to avoid proxy issues with SSE
 const API_URL = import.meta.env.VITE_API_URL || 'http://216.238.79.60:8123';
-const MAP_TITLE = import.meta.env.VITE_MAP_TITLE || 'QuetzalMap';
 
 function App() {
   const [world, setWorld] = useState('world');
@@ -71,7 +70,6 @@ function App() {
         availableWorlds={availableWorlds}
         scaleWidth={scaleWidth}
         scaleText={scaleText}
-        title={MAP_TITLE}
       />
     </div>
   );

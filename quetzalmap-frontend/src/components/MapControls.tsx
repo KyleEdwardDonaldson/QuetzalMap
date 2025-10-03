@@ -5,7 +5,6 @@ interface MapControlsProps {
   availableWorlds: string[];
   scaleText?: string;
   scaleWidth?: number;
-  title?: string;
 }
 
 // World name mappings for display
@@ -18,7 +17,7 @@ const WORLD_NAMES: Record<string, string> = {
 /**
  * Map control panel - displays connection status and controls
  */
-export default function MapControls({ connected, world, onWorldChange, availableWorlds, scaleText, scaleWidth, title = 'QuetzalMap' }: MapControlsProps) {
+export default function MapControls({ connected, world, onWorldChange, availableWorlds, scaleText, scaleWidth }: MapControlsProps) {
   return (
     <div className="absolute top-4 right-4 z-[1000] space-y-2">
       {/* Main controls */}
@@ -26,7 +25,7 @@ export default function MapControls({ connected, world, onWorldChange, available
         <div className="space-y-4">
           {/* Header */}
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-gray-900">{title}</h2>
+            <h2 className="text-lg font-bold text-gray-900">QuetzalMap</h2>
             <div className="flex items-center gap-2">
               <div className={`w-2 h-2 rounded-full ${connected ? 'bg-green-500' : 'bg-red-500'}`}></div>
               <span className="text-xs text-gray-600">
