@@ -33,11 +33,6 @@ public final class TileStorage {
     public boolean save(Tile tile) {
         Path tilePath = getTilePath(tile.getCoord());
 
-        // Debug logging
-        LOGGER.info("Saving tile: " + tile.getCoord());
-        LOGGER.info("Tile path: " + tilePath);
-        LOGGER.info("Tile path parent: " + tilePath.getParent());
-
         try {
             // Create parent directories
             Path parentPath = tilePath.getParent();

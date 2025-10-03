@@ -60,8 +60,8 @@ public class MinecraftChunk {
     }
 
     private void parse(CompoundTag root) {
-        LOGGER.info("Parsing chunk " + chunkX + "," + chunkZ);
-        LOGGER.info("Root keys: " + root.keySet());
+        LOGGER.fine("Parsing chunk " + chunkX + "," + chunkZ);
+        LOGGER.fine("Root keys: " + root.keySet());
 
         // Minecraft 1.18+ has no "Level" tag, data is in root
         ListTag<?> sections = root.getListTag("sections");
@@ -77,7 +77,7 @@ public class MinecraftChunk {
             }
         }
 
-        LOGGER.info("Found " + sections.size() + " sections");
+        LOGGER.fine("Found " + sections.size() + " sections");
         int blocksFound = 0;
         int sectionsProcessed = 0;
 
@@ -87,7 +87,7 @@ public class MinecraftChunk {
             int sectionY = section.getByte("Y");
             sectionsProcessed++;
 
-            LOGGER.info("Processing section Y=" + sectionY + " (section " + sectionsProcessed + "/" + sections.size() + ")");
+            LOGGER.fine("Processing section Y=" + sectionY + " (section " + sectionsProcessed + "/" + sections.size() + ")");
 
             CompoundTag blockStates = section.getCompoundTag("block_states");
             if (blockStates == null) {
@@ -101,7 +101,7 @@ public class MinecraftChunk {
                 continue;
             }
 
-            LOGGER.info("Section Y=" + sectionY + " has palette size: " + palette.size());
+            LOGGER.fine("Section Y=" + sectionY + " has palette size: " + palette.size());
             LongArrayTag dataTag = blockStates.getLongArrayTag("data");
 
             // Parse each block in the section
@@ -132,7 +132,7 @@ public class MinecraftChunk {
             }
         }
 
-        LOGGER.info("Chunk " + chunkX + "," + chunkZ + " parsing complete. Found " + blocksFound + " blocks across " + sectionsProcessed + " sections");
+        LOGGER.fine("Chunk " + chunkX + "," + chunkZ + " parsing complete. Found " + blocksFound + " blocks across " + sectionsProcessed + " sections");
     }
 
     private int getBlockIndex(int x, int y, int z) {

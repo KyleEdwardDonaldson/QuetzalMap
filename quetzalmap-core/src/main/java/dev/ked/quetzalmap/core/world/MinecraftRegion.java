@@ -26,7 +26,7 @@ public class MinecraftRegion {
         this.regionFile = regionFile;
         this.regionX = regionX;
         this.regionZ = regionZ;
-        LOGGER.info("Created MinecraftRegion: file=" + regionFile + ", regionX=" + regionX + ", regionZ=" + regionZ);
+        LOGGER.fine("Created MinecraftRegion: file=" + regionFile + ", regionX=" + regionX + ", regionZ=" + regionZ);
     }
 
     /**
@@ -36,14 +36,14 @@ public class MinecraftRegion {
         ChunkPos pos = new ChunkPos(chunkX, chunkZ);
 
         if (chunks.containsKey(pos)) {
-            LOGGER.info("Chunk " + chunkX + "," + chunkZ + " found in cache");
+            LOGGER.fine("Chunk " + chunkX + "," + chunkZ + " found in cache");
             return chunks.get(pos);
         }
 
-        LOGGER.info("Loading chunk " + chunkX + "," + chunkZ + " from region file...");
+        LOGGER.fine("Loading chunk " + chunkX + "," + chunkZ + " from region file...");
         MinecraftChunk chunk = loadChunk(chunkX, chunkZ);
         if (chunk != null) {
-            LOGGER.info("Chunk " + chunkX + "," + chunkZ + " loaded successfully");
+            LOGGER.fine("Chunk " + chunkX + "," + chunkZ + " loaded successfully");
             chunks.put(pos, chunk);
         } else {
             LOGGER.warning("Chunk " + chunkX + "," + chunkZ + " is NULL after loading");
@@ -56,7 +56,7 @@ public class MinecraftRegion {
         int localX = chunkX & 31;
         int localZ = chunkZ & 31;
 
-        LOGGER.info("loadChunk: localX=" + localX + ", localZ=" + localZ);
+        LOGGER.fine("loadChunk: localX=" + localX + ", localZ=" + localZ);
 
         try (RandomAccessFile raf = new RandomAccessFile(regionFile.toFile(), "r")) {
             // Read chunk location from header
@@ -64,7 +64,7 @@ public class MinecraftRegion {
             raf.seek(headerOffset);
 
             int location = raf.readInt();
-            LOGGER.info("Chunk " + chunkX + "," + chunkZ + " location header: " + location);
+            LOGGER.fine("Chunk " + chunkX + "," + chunkZ + " location header: " + location);
             if (location == 0) {
                 LOGGER.warning("Chunk " + chunkX + "," + chunkZ + " location is 0 (doesn't exist in region)");
                 return null; // Chunk doesn't exist
@@ -73,7 +73,7 @@ public class MinecraftRegion {
             int offset = (location >> 8) * 4096;
             int sectorCount = location & 0xFF;
 
-            LOGGER.info("Chunk " + chunkX + "," + chunkZ + " offset=" + offset + ", sectorCount=" + sectorCount);
+            LOGGER.fine("Chunk " + chunkX + "," + chunkZ + " offset=" + offset + ", sectorCount=" + sectorCount);
 
             if (offset == 0 || sectorCount == 0) {
                 LOGGER.warning("Chunk " + chunkX + "," + chunkZ + " has invalid offset or sector count");
@@ -85,7 +85,7 @@ public class MinecraftRegion {
             int length = raf.readInt();
             byte compressionType = raf.readByte();
 
-            LOGGER.info("Chunk " + chunkX + "," + chunkZ + " length=" + length + ", compressionType=" + compressionType);
+            LOGGER.fine("Chunk " + chunkX + "," + chunkZ + " length=" + length + ", compressionType=" + compressionType);
 
             if (length == 0 || compressionType == 0) {
                 LOGGER.warning("Chunk " + chunkX + "," + chunkZ + " has invalid length or compression type");
@@ -101,21 +101,21 @@ public class MinecraftRegion {
 
             if (compressionType == 1) {
                 // GZip
-                LOGGER.info("Using GZip decompression");
+                LOGGER.fine("Using GZip decompression");
                 decompressed = new java.util.zip.GZIPInputStream(bais);
             } else if (compressionType == 2) {
                 // Zlib
-                LOGGER.info("Using Zlib decompression");
+                LOGGER.fine("Using Zlib decompression");
                 decompressed = new java.util.zip.InflaterInputStream(bais);
             } else {
                 throw new IOException("Unsupported compression type: " + compressionType);
             }
 
-            LOGGER.info("Reading NBT data for chunk " + chunkX + "," + chunkZ + "...");
+            LOGGER.fine("Reading NBT data for chunk " + chunkX + "," + chunkZ + "...");
             try (NBTInputStream nbtIn = new NBTInputStream(decompressed)) {
                 NamedTag namedTag = nbtIn.readTag(512);
                 CompoundTag root = (CompoundTag) namedTag.getTag();
-                LOGGER.info("NBT data read successfully, creating MinecraftChunk...");
+                LOGGER.fine("NBT data read successfully, creating MinecraftChunk...");
                 return new MinecraftChunk(root, chunkX, chunkZ);
             }
         }

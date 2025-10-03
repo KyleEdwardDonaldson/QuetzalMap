@@ -30,7 +30,7 @@ public final class SSEManager {
         SSEConnection connection = new SSEConnection(connectionId, exchange);
 
         connections.add(connection);
-        LOGGER.info("SSE connection registered: " + connectionId + " (total: " + connections.size() + ")");
+        LOGGER.fine("SSE connection registered: " + connectionId + " (total: " + connections.size() + ")");
 
         // Send initial connection event
         connection.sendEvent("connected", String.format("{\"id\":%d}", connectionId));
@@ -43,7 +43,7 @@ public final class SSEManager {
      */
     public void unregisterConnection(SSEConnection connection) {
         connections.remove(connection);
-        LOGGER.info("SSE connection closed: " + connection.getId() + " (total: " + connections.size() + ")");
+        LOGGER.fine("SSE connection closed: " + connection.getId() + " (total: " + connections.size() + ")");
     }
 
     /**
