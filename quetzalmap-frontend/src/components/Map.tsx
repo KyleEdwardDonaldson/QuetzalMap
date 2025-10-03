@@ -1,4 +1,5 @@
-import { MapContainer, TileLayer } from 'react-leaflet';
+import { MapContainer, TileLayer, useMapEvents } from 'react-leaflet';
+import { useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import ScaleBar from './ScaleBar';
@@ -31,23 +32,47 @@ const QuetzalCRS = L.extend({}, L.CRS.Simple, {
 });
 
 /**
+ * Dynamic zoom tracker component
+ * Updates keepBuffer based on current zoom level
+ */
+function ZoomTracker({ onZoomChange }: { onZoomChange: (zoom: number) => void }) {
+  useMapEvents({
+    zoomend: (e) => {
+      onZoomChange(e.target.getZoom());
+    }
+  });
+  return null;
+}
+
+/**
  * QuetzalMap tile layer component
  * Fetches tiles from the backend server
  */
 function QuetzalTileLayer({ apiUrl, world }: { apiUrl: string; world: string }) {
+  const [currentZoom, setCurrentZoom] = useState(0);
+
+  // Calculate keepBuffer based on zoom level
+  // More zoomed out (negative zoom) = need more buffer
+  const keepBuffer = currentZoom <= -3 ? 32 :
+                     currentZoom <= -2 ? 24 :
+                     currentZoom <= -1 ? 16 : 8;
+
   return (
-    <TileLayer
-      url={`${apiUrl}/tiles/${world}/0/{x}_{y}.png`}
-      attribution='&copy; QuetzalMap'
-      tileSize={512}
-      minNativeZoom={0}
-      maxNativeZoom={0}
-      minZoom={-3}
-      maxZoom={3}
-      noWrap={true}
-      keepBuffer={4}
-      updateWhenIdle={false}
-    />
+    <>
+      <ZoomTracker onZoomChange={setCurrentZoom} />
+      <TileLayer
+        url={`${apiUrl}/tiles/${world}/0/{x}_{y}.png`}
+        attribution='&copy; QuetzalMap'
+        tileSize={512}
+        minNativeZoom={0}
+        maxNativeZoom={0}
+        minZoom={-3}
+        maxZoom={3}
+        noWrap={true}
+        keepBuffer={keepBuffer}
+        updateWhenIdle={false}
+      />
+    </>
   );
 }
 
