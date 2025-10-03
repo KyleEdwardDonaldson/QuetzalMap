@@ -85,16 +85,32 @@ public final class TileHandler implements HttpHandler {
 
     /**
      * Serve a tile from disk.
+     * Fast path for cached tiles - still uses blocking I/O but tiles are small (~200KB).
      */
     private void serveTileFromDisk(HttpServerExchange exchange, Path tilePath) {
         try {
+            // Read tile data (fast - tiles are small and likely in OS page cache)
             byte[] tileData = Files.readAllBytes(tilePath);
 
+            // Set response headers
             exchange.setStatusCode(StatusCodes.OK);
             exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "image/png");
             exchange.getResponseHeaders().put(Headers.CONTENT_LENGTH, tileData.length);
             exchange.getResponseHeaders().put(Headers.CACHE_CONTROL, "public, max-age=300"); // 5 min cache
 
+            // Add ETag for browser caching
+            String etag = "\"" + tilePath.getFileName().toString() + "-" + Files.getLastModifiedTime(tilePath).toMillis() + "\"";
+            exchange.getResponseHeaders().put(Headers.ETAG, etag);
+
+            // Check If-None-Match for 304 Not Modified
+            String ifNoneMatch = exchange.getRequestHeaders().getFirst(Headers.IF_NONE_MATCH);
+            if (etag.equals(ifNoneMatch)) {
+                exchange.setStatusCode(StatusCodes.NOT_MODIFIED);
+                exchange.endExchange();
+                return;
+            }
+
+            // Send tile data
             exchange.startBlocking();
             exchange.getOutputStream().write(tileData);
             exchange.getOutputStream().close();
@@ -107,34 +123,54 @@ public final class TileHandler implements HttpHandler {
 
     /**
      * Render a tile on-demand and serve it.
+     * Uses proper async handling to avoid blocking HTTP worker threads.
      */
     private void renderAndServeTile(HttpServerExchange exchange, TileCoord coord, Path worldDir) {
-        exchange.dispatch(() -> {
-            try {
-                LOGGER.fine("Rendering tile for world directory: " + worldDir.toAbsolutePath());
+        // Start async dispatch - HTTP thread can be released
+        if (exchange.isInIoThread()) {
+            exchange.dispatch(() -> renderAndServeTile(exchange, coord, worldDir));
+            return;
+        }
 
-                // Render tile asynchronously
-                CompletableFuture<Tile> future = tileManager.renderTile(coord, worldDir);
+        try {
+            LOGGER.fine("Rendering tile for world directory: " + worldDir.toAbsolutePath());
 
-                future.thenAccept(tile -> {
-                    // Tile rendered - serve from disk
-                    Path tilePath = tilesDirectory.resolve(coord.getRelativePath());
+            // Render tile asynchronously - this returns immediately
+            CompletableFuture<Tile> renderFuture = tileManager.renderTile(coord, worldDir);
+
+            // When render completes, dispatch response back to IO thread
+            renderFuture.whenCompleteAsync((tile, error) -> {
+                if (error != null) {
+                    LOGGER.severe("Failed to render tile " + coord + ": " + error.getMessage());
+                    exchange.dispatch(() -> {
+                        sendError(exchange, StatusCodes.INTERNAL_SERVER_ERROR, "Tile render error");
+                    });
+                    return;
+                }
+
+                if (tile == null) {
+                    exchange.dispatch(() -> {
+                        sendError(exchange, StatusCodes.INTERNAL_SERVER_ERROR, "Tile render returned null");
+                    });
+                    return;
+                }
+
+                // Tile rendered successfully - serve it
+                Path tilePath = tilesDirectory.resolve(coord.getRelativePath());
+                exchange.dispatch(() -> {
                     if (Files.exists(tilePath)) {
                         serveTileFromDisk(exchange, tilePath);
                     } else {
-                        sendError(exchange, StatusCodes.INTERNAL_SERVER_ERROR, "Tile render failed");
+                        sendError(exchange, StatusCodes.INTERNAL_SERVER_ERROR, "Tile file not found after render");
                     }
-                }).exceptionally(e -> {
-                    LOGGER.severe("Failed to render tile " + coord + ": " + e.getMessage());
-                    sendError(exchange, StatusCodes.INTERNAL_SERVER_ERROR, "Tile render error");
-                    return null;
                 });
+            });
 
-            } catch (Exception e) {
-                LOGGER.severe("Error rendering tile: " + e.getMessage());
-                sendError(exchange, StatusCodes.INTERNAL_SERVER_ERROR, "Render error");
-            }
-        });
+        } catch (Exception e) {
+            LOGGER.severe("Error initiating tile render: " + e.getMessage());
+            e.printStackTrace();
+            sendError(exchange, StatusCodes.INTERNAL_SERVER_ERROR, "Render error");
+        }
     }
 
     /**
