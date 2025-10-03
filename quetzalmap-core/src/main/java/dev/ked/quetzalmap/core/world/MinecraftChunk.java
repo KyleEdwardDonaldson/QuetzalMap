@@ -91,13 +91,13 @@ public class MinecraftChunk {
 
             CompoundTag blockStates = section.getCompoundTag("block_states");
             if (blockStates == null) {
-                LOGGER.warning("Section Y=" + sectionY + " has no block_states");
+                // Empty section (likely air or void), skip silently
                 continue;
             }
 
             ListTag<?> palette = blockStates.getListTag("palette");
             if (palette == null || palette.size() == 0) {
-                LOGGER.warning("Section Y=" + sectionY + " has no palette");
+                // Empty palette, skip silently
                 continue;
             }
 
