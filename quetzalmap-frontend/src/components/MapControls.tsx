@@ -2,14 +2,22 @@ interface MapControlsProps {
   connected: boolean;
   world: string;
   onWorldChange: (world: string) => void;
+  availableWorlds: string[];
   scaleText?: string;
   scaleWidth?: number;
 }
 
+// World name mappings for display
+const WORLD_NAMES: Record<string, string> = {
+  'world': 'Overworld',
+  'world_nether': 'Nether',
+  'world_the_end': 'The End'
+};
+
 /**
  * Map control panel - displays connection status and controls
  */
-export default function MapControls({ connected, world, onWorldChange, scaleText, scaleWidth }: MapControlsProps) {
+export default function MapControls({ connected, world, onWorldChange, availableWorlds, scaleText, scaleWidth }: MapControlsProps) {
   return (
     <div className="absolute top-4 right-4 z-[1000] space-y-2">
       {/* Main controls */}
@@ -26,21 +34,25 @@ export default function MapControls({ connected, world, onWorldChange, scaleText
             </div>
           </div>
 
-          {/* World selector */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              World
-            </label>
-            <select
-              value={world}
-              onChange={(e) => onWorldChange(e.target.value)}
-              className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="world">Overworld</option>
-              <option value="world_nether">Nether</option>
-              <option value="world_the_end">The End</option>
-            </select>
-          </div>
+          {/* World selector - only show if multiple worlds available */}
+          {availableWorlds.length > 1 && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                World
+              </label>
+              <select
+                value={world}
+                onChange={(e) => onWorldChange(e.target.value)}
+                className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {availableWorlds.map(worldName => (
+                  <option key={worldName} value={worldName}>
+                    {WORLD_NAMES[worldName] || worldName}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           {/* Info */}
           <div className="text-xs text-gray-500 pt-2 border-t">
