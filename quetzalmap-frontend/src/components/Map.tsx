@@ -43,7 +43,7 @@ function QuetzalTileLayer({ apiUrl, world }: { apiUrl: string; world: string }) 
       minNativeZoom={0}
       maxNativeZoom={0}
       noWrap={true}
-      keepBuffer={2}
+      keepBuffer={4}
       updateWhenIdle={false}
     />
   );
