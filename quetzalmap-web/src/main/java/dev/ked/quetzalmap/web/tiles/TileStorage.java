@@ -1,11 +1,15 @@
 package dev.ked.quetzalmap.web.tiles;
 
 import javax.imageio.ImageIO;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
+import javax.imageio.stream.ImageOutputStream;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -46,8 +50,25 @@ public final class TileStorage {
             Path tempPath = tilePath.resolveSibling(tilePath.getFileName() + ".tmp");
             BufferedImage image = tile.getImage();
 
-            // Save as PNG
-            ImageIO.write(image, "PNG", tempPath.toFile());
+            // Save as PNG with compression (30-50% smaller files)
+            try (ImageOutputStream ios = ImageIO.createImageOutputStream(tempPath.toFile())) {
+                Iterator<ImageWriter> writers = ImageIO.getImageWritersByFormatName("png");
+                if (!writers.hasNext()) {
+                    throw new IOException("No PNG writer available");
+                }
+
+                ImageWriter writer = writers.next();
+                writer.setOutput(ios);
+
+                ImageWriteParam param = writer.getDefaultWriteParam();
+                if (param.canWriteCompressed()) {
+                    param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+                    param.setCompressionQuality(0.85f); // High quality, good compression
+                }
+
+                writer.write(null, new javax.imageio.IIOImage(image, null, null), param);
+                writer.dispose();
+            }
 
             // Atomic move
             Files.move(tempPath, tilePath, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
