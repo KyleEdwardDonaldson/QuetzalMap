@@ -43,7 +43,9 @@ export function useSSE(url: string, enabled: boolean = true) {
       'tile_updated',
       'marker_updated',
       'marker_removed',
-      'player_moved'
+      'player_moved',
+      'player_list',
+      'player_disconnect'
     ];
 
     eventTypes.forEach(type => {

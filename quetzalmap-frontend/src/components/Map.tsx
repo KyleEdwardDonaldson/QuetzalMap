@@ -3,12 +3,15 @@ import { useState, useEffect } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import ScaleBar from './ScaleBar';
+import { PlayerMarkers } from './PlayerMarkers';
+import type { SSEEvent } from '../hooks/useSSE';
 
 interface MapProps {
   apiUrl?: string;
   world?: string;
   zoom?: number;
   center?: [number, number];
+  events?: SSEEvent[];
   onScaleUpdate?: (width: number, text: string) => void;
 }
 
@@ -114,6 +117,7 @@ export default function Map({
   world = 'world',
   zoom = 0,
   center = [0, 0],
+  events = [],
   onScaleUpdate
 }: MapProps) {
   return (
@@ -127,6 +131,7 @@ export default function Map({
     >
       <QuetzalTileLayer apiUrl={apiUrl} world={world} />
       {onScaleUpdate && <ScaleBar onUpdate={onScaleUpdate} />}
+      <PlayerMarkers events={events} world={world} />
     </MapContainer>
   );
 }

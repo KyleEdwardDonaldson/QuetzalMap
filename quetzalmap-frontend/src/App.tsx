@@ -61,6 +61,7 @@ function App() {
         world={world}
         zoom={0}
         center={[0, 0]}
+        events={events}
         onScaleUpdate={handleScaleUpdate}
       />
       <MapControls
