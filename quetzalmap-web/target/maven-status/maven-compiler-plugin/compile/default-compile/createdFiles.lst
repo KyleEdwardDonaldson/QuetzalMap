@@ -1,7 +1,9 @@
 dev/ked/quetzalmap/web/tiles/TileCache.class
 dev/ked/quetzalmap/web/tiles/TileManager.class
 dev/ked/quetzalmap/web/tiles/Tile.class
+dev/ked/quetzalmap/web/pregen/TilePreGenerator.class
 dev/ked/quetzalmap/web/rendering/TileRenderer.class
+dev/ked/quetzalmap/web/pregen/TilePreGenerator$PregenStats.class
 dev/ked/quetzalmap/web/pool/ChunkPixelData.class
 dev/ked/quetzalmap/web/world/WorldAdapter$CacheStats.class
 dev/ked/quetzalmap/web/tiles/DirtyTileTracker.class

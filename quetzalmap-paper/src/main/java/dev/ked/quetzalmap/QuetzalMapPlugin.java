@@ -1,6 +1,7 @@
 package dev.ked.quetzalmap;
 
 import dev.ked.quetzalmap.server.WebServer;
+import dev.ked.quetzalmap.web.pregen.TilePreGenerator;
 import dev.ked.quetzalmap.web.tiles.TileManager;
 import dev.ked.quetzalmap.web.world.WorldAdapter;
 import org.bukkit.Bukkit;
@@ -21,6 +22,7 @@ public final class QuetzalMapPlugin extends JavaPlugin {
     private WebServer webServer;
     private BatchUpdateScheduler updateScheduler;
     private ChunkEventListener chunkListener;
+    private TilePreGenerator preGenerator;
 
     @Override
     public void onEnable() {
@@ -39,6 +41,9 @@ public final class QuetzalMapPlugin extends JavaPlugin {
             // Start web server
             webServer.start();
 
+            // Start pre-generation after a delay (let server finish starting)
+            Bukkit.getScheduler().runTaskLaterAsynchronously(this, this::startPreGeneration, 200L); // 10 seconds
+
             LOGGER.info("QuetzalMap enabled successfully!");
             LOGGER.info("Tiles directory: " + getTilesDirectory());
             LOGGER.info("Worlds directory: " + getWorldsDirectory());
@@ -56,7 +61,12 @@ public final class QuetzalMapPlugin extends JavaPlugin {
         LOGGER.info("QuetzalMap disabling...");
 
         try {
-            // Stop web server first
+            // Stop pre-generation first
+            if (preGenerator != null) {
+                preGenerator.stop();
+            }
+
+            // Stop web server
             if (webServer != null) {
                 webServer.stop();
             }
@@ -164,5 +174,42 @@ public final class QuetzalMapPlugin extends JavaPlugin {
      */
     public WebServer getWebServer() {
         return webServer;
+    }
+
+    /**
+     * Get the pre-generator instance.
+     */
+    public TilePreGenerator getPreGenerator() {
+        return preGenerator;
+    }
+
+    /**
+     * Start pre-generation for spawn area.
+     * Called automatically on server start with a delay.
+     */
+    private void startPreGeneration() {
+        try {
+            // TODO: Make these configurable
+            int pregenThreads = 4; // Low priority background threads
+            int radiusTiles = 10;  // 10 tiles = 5120 blocks radius from spawn
+
+            preGenerator = new TilePreGenerator(tileManager, pregenThreads);
+
+            // Pre-generate spawn area for overworld
+            Path worldsDir = getWorldsDirectory();
+            preGenerator.preGenerateArea(worldsDir, "world", 0, 0, radiusTiles)
+                    .thenAccept(stats -> {
+                        LOGGER.info("Spawn area pre-generation complete: " + stats);
+                    })
+                    .exceptionally(error -> {
+                        LOGGER.warning("Pre-generation failed: " + error.getMessage());
+                        return null;
+                    });
+
+            LOGGER.info("Started background pre-generation for spawn area (radius=" + radiusTiles + " tiles)");
+
+        } catch (Exception e) {
+            LOGGER.warning("Failed to start pre-generation: " + e.getMessage());
+        }
     }
 }

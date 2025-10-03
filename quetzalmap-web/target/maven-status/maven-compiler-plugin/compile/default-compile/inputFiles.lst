@@ -8,4 +8,5 @@
 /var/repos/QuetzalMap/quetzalmap-web/src/main/java/dev/ked/quetzalmap/web/tiles/DirtyTileTracker.java
 /var/repos/QuetzalMap/quetzalmap-web/src/main/java/dev/ked/quetzalmap/web/rendering/TileRenderer.java
 /var/repos/QuetzalMap/quetzalmap-web/src/main/java/dev/ked/quetzalmap/web/world/WorldAdapter.java
+/var/repos/QuetzalMap/quetzalmap-web/src/main/java/dev/ked/quetzalmap/web/pregen/TilePreGenerator.java
 /var/repos/QuetzalMap/quetzalmap-web/src/main/java/dev/ked/quetzalmap/web/tiles/Tile.java
