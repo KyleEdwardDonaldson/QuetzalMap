@@ -63,6 +63,7 @@
             <scope>system</scope>
             <systemPath>${project.basedir}/../../Stormcraft/target/stormcraft-0.1.0.jar</systemPath>
         </dependency>
+        <!-- Temporarily commented out - not needed for player tracking
         <dependency>
             <groupId>dev.ked</groupId>
             <artifactId>bettershop</artifactId>
@@ -70,6 +71,7 @@
             <scope>system</scope>
             <systemPath>${project.basedir}/../../BetterShop/target/BetterShop-1.0.0.jar</systemPath>
         </dependency>
+        -->
     </dependencies>
 
     <build>

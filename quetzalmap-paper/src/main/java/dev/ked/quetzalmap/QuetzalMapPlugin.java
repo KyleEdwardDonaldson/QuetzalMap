@@ -22,7 +22,9 @@ public final class QuetzalMapPlugin extends JavaPlugin {
     private WebServer webServer;
     private BatchUpdateScheduler updateScheduler;
     private ChunkEventListener chunkListener;
+    private PlayerQuitListener playerQuitListener;
     private TilePreGenerator preGenerator;
+    private PlayerTracker playerTracker;
 
     @Override
     public void onEnable() {
@@ -40,6 +42,9 @@ public final class QuetzalMapPlugin extends JavaPlugin {
 
             // Start web server
             webServer.start();
+
+            // Start player tracker
+            playerTracker.start();
 
             // Start pre-generation after a delay (let server finish starting)
             Bukkit.getScheduler().runTaskLaterAsynchronously(this, this::startPreGeneration, 200L); // 10 seconds
@@ -61,7 +66,12 @@ public final class QuetzalMapPlugin extends JavaPlugin {
         LOGGER.info("QuetzalMap disabling...");
 
         try {
-            // Stop pre-generation first
+            // Stop player tracker first
+            if (playerTracker != null) {
+                playerTracker.cancel();
+            }
+
+            // Stop pre-generation
             if (preGenerator != null) {
                 preGenerator.stop();
             }
@@ -123,6 +133,14 @@ public final class QuetzalMapPlugin extends JavaPlugin {
         // Create chunk listener
         chunkListener = new ChunkEventListener(tileManager, updateScheduler);
         LOGGER.info("ChunkEventListener initialized");
+
+        // Create player tracker
+        playerTracker = new PlayerTracker(this, webServer.getSSEManager());
+        LOGGER.info("PlayerTracker initialized");
+
+        // Create player quit listener
+        playerQuitListener = new PlayerQuitListener(playerTracker);
+        LOGGER.info("PlayerQuitListener initialized");
     }
 
     /**
@@ -130,6 +148,7 @@ public final class QuetzalMapPlugin extends JavaPlugin {
      */
     private void registerListeners() {
         Bukkit.getPluginManager().registerEvents(chunkListener, this);
+        Bukkit.getPluginManager().registerEvents(playerQuitListener, this);
         LOGGER.info("Event listeners registered");
     }
 
