@@ -33,6 +33,7 @@ public final class WebServer {
     private final Path worldsDirectory;
     private final SSEManager sseManager;
     private Undertow server;
+    private PathHandler pathHandler;
 
     public WebServer(String host, int port, TileManager tileManager, Path tilesDirectory, Path worldsDirectory) {
         this.host = host;
@@ -41,6 +42,33 @@ public final class WebServer {
         this.tilesDirectory = tilesDirectory;
         this.worldsDirectory = worldsDirectory;
         this.sseManager = new SSEManager();
+    }
+
+    /**
+     * Initialize the path handler with default handlers.
+     * Called automatically by start(), but can be called earlier to register custom handlers.
+     */
+    private void initializePathHandler() {
+        if (pathHandler != null) {
+            return;
+        }
+
+        // Create handlers
+        TileHandler tileHandler = new TileHandler(tileManager, tilesDirectory, worldsDirectory);
+        SSEHandler sseHandler = new SSEHandler(sseManager);
+        MarkerHandler markerHandler = new MarkerHandler();
+        WorldsHandler worldsHandler = new WorldsHandler(worldsDirectory);
+        LOGGER.info("Handlers created successfully");
+
+        // Build path handler
+        this.pathHandler = new PathHandler()
+                .addPrefixPath("/tiles", tileHandler)
+                .addPrefixPath("/events", sseHandler)
+                .addPrefixPath("/api/markers", markerHandler)
+                .addExactPath("/api/worlds", worldsHandler)
+                .addExactPath("/", this::handleRoot)
+                .addExactPath("/health", this::handleHealth);
+        LOGGER.info("Path handlers registered");
     }
 
     /**
@@ -55,22 +83,8 @@ public final class WebServer {
         try {
             LOGGER.info("Starting WebServer on " + host + ":" + port + "...");
 
-            // Create handlers
-            TileHandler tileHandler = new TileHandler(tileManager, tilesDirectory, worldsDirectory);
-            SSEHandler sseHandler = new SSEHandler(sseManager);
-            MarkerHandler markerHandler = new MarkerHandler();
-            WorldsHandler worldsHandler = new WorldsHandler(worldsDirectory);
-            LOGGER.info("Handlers created successfully");
-
-            // Build path handler
-            PathHandler pathHandler = new PathHandler()
-                    .addPrefixPath("/tiles", tileHandler)
-                    .addPrefixPath("/events", sseHandler)
-                    .addPrefixPath("/api/markers", markerHandler)
-                    .addExactPath("/api/worlds", worldsHandler)
-                    .addExactPath("/", this::handleRoot)
-                    .addExactPath("/health", this::handleHealth);
-            LOGGER.info("Path handlers registered");
+            // Initialize path handler if not already done
+            initializePathHandler();
 
             // Wrap with CORS handler
             HttpHandler corsHandler = addCorsHeaders(pathHandler);
@@ -195,6 +209,15 @@ public final class WebServer {
                 "  GET /api/markers - Marker data\n" +
                 "  GET /api/worlds - Available worlds\n" +
                 "  GET /health - Health check\n");
+    }
+
+    /**
+     * Register a custom handler to the path handler.
+     * Must be called before start().
+     */
+    public void registerHandler(String path, HttpHandler handler) {
+        initializePathHandler();
+        pathHandler.addExactPath(path, handler);
     }
 
     /**

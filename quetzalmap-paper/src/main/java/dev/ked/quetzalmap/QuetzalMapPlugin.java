@@ -39,6 +39,9 @@ public final class QuetzalMapPlugin extends JavaPlugin {
             // Register event listeners
             registerListeners();
 
+            // Register custom API endpoints
+            registerWorldBorderHandler();
+
             // Start update scheduler
             updateScheduler.start();
 
@@ -177,6 +180,46 @@ public final class QuetzalMapPlugin extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(playerJoinListener, this);
         Bukkit.getPluginManager().registerEvents(playerQuitListener, this);
         LOGGER.info("Event listeners registered");
+    }
+
+    /**
+     * Register world border API handler.
+     */
+    private void registerWorldBorderHandler() {
+        webServer.registerHandler("/api/worldborder", exchange -> {
+            exchange.getResponseHeaders().put(io.undertow.util.Headers.CONTENT_TYPE, "application/json");
+
+            try {
+                StringBuilder json = new StringBuilder("{\"borders\":[");
+                boolean first = true;
+
+                for (org.bukkit.World world : Bukkit.getWorlds()) {
+                    org.bukkit.WorldBorder border = world.getWorldBorder();
+
+                    if (!first) {
+                        json.append(",");
+                    }
+                    first = false;
+
+                    json.append(String.format(
+                        "{\"world\":\"%s\",\"centerX\":%.2f,\"centerZ\":%.2f,\"size\":%.2f}",
+                        world.getName(),
+                        border.getCenter().getX(),
+                        border.getCenter().getZ(),
+                        border.getSize()
+                    ));
+                }
+
+                json.append("]}");
+
+                exchange.getResponseSender().send(json.toString());
+
+            } catch (Exception e) {
+                LOGGER.warning("Error getting world borders: " + e.getMessage());
+                exchange.setStatusCode(500);
+                exchange.getResponseSender().send("{\"error\":\"Failed to get world borders\"}");
+            }
+        });
     }
 
     /**

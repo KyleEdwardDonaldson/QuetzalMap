@@ -6,6 +6,7 @@ import 'leaflet/dist/leaflet.css';
 import ScaleBar from './ScaleBar';
 import { PlayerMarkers } from './PlayerMarkers';
 import StormMarkers from './StormMarkers';
+import WorldBorder from './WorldBorder';
 import type { SSEEvent } from '../hooks/useSSE';
 
 interface MapProps {
@@ -185,6 +186,7 @@ export default function Map({
     >
       {mapRef && <MapRefSetter mapRef={mapRef} />}
       <QuetzalTileLayer apiUrl={apiUrl} world={world} />
+      <WorldBorder apiUrl={apiUrl} currentWorld={world} />
       {onScaleUpdate && <ScaleBar onUpdate={onScaleUpdate} />}
       <PlayerMarkers events={events} world={world} />
       <StormMarkers events={events} world={world} />
