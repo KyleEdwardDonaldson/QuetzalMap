@@ -16,10 +16,18 @@ public final class SSEManager {
 
     private final Set<SSEConnection> connections;
     private final AtomicInteger connectionIdCounter;
+    private Runnable onNewConnection;
 
     public SSEManager() {
         this.connections = ConcurrentHashMap.newKeySet();
         this.connectionIdCounter = new AtomicInteger(0);
+    }
+
+    /**
+     * Set callback to run when a new connection is established.
+     */
+    public void setOnNewConnection(Runnable callback) {
+        this.onNewConnection = callback;
     }
 
     /**
@@ -30,10 +38,19 @@ public final class SSEManager {
         SSEConnection connection = new SSEConnection(connectionId, exchange);
 
         connections.add(connection);
-        LOGGER.fine("SSE connection registered: " + connectionId + " (total: " + connections.size() + ")");
+        LOGGER.info("SSE connection registered: " + connectionId + " (total: " + connections.size() + ", isClosed=" + connection.isClosed() + ")");
 
         // Send initial connection event
         connection.sendEvent("connected", String.format("{\"id\":%d}", connectionId));
+
+        // Trigger callback to send initial data (e.g., player list)
+        if (onNewConnection != null) {
+            try {
+                onNewConnection.run();
+            } catch (Exception e) {
+                LOGGER.warning("Error in onNewConnection callback: " + e.getMessage());
+            }
+        }
 
         return connection;
     }
@@ -43,7 +60,7 @@ public final class SSEManager {
      */
     public void unregisterConnection(SSEConnection connection) {
         connections.remove(connection);
-        LOGGER.fine("SSE connection closed: " + connection.getId() + " (total: " + connections.size() + ")");
+        LOGGER.info("SSE connection unregistered: " + connection.getId() + " (total: " + connections.size() + ")");
     }
 
     /**
@@ -61,7 +78,13 @@ public final class SSEManager {
      */
     public void broadcast(String event, String data) {
         // Remove closed connections
+        int beforeRemove = connections.size();
         connections.removeIf(SSEConnection::isClosed);
+        int afterRemove = connections.size();
+        if (beforeRemove != afterRemove) {
+            LOGGER.fine(String.format("Removed %d closed connections (%d -> %d)",
+                    beforeRemove - afterRemove, beforeRemove, afterRemove));
+        }
 
         // Send to all active connections
         int sent = 0;

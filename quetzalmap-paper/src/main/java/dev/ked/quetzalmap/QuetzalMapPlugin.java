@@ -22,6 +22,7 @@ public final class QuetzalMapPlugin extends JavaPlugin {
     private WebServer webServer;
     private BatchUpdateScheduler updateScheduler;
     private ChunkEventListener chunkListener;
+    private PlayerJoinListener playerJoinListener;
     private PlayerQuitListener playerQuitListener;
     private TilePreGenerator preGenerator;
     private PlayerTracker playerTracker;
@@ -45,6 +46,12 @@ public final class QuetzalMapPlugin extends JavaPlugin {
 
             // Start player tracker
             playerTracker.start();
+
+            // Set up SSE callback to send initial player list on new connections
+            webServer.getSSEManager().setOnNewConnection(() -> {
+                LOGGER.fine("New SSE connection - sending initial player list");
+                playerTracker.sendInitialPlayerList();
+            });
 
             // Start pre-generation after a delay (let server finish starting)
             Bukkit.getScheduler().runTaskLaterAsynchronously(this, this::startPreGeneration, 200L); // 10 seconds
@@ -138,7 +145,10 @@ public final class QuetzalMapPlugin extends JavaPlugin {
         playerTracker = new PlayerTracker(this, webServer.getSSEManager());
         LOGGER.info("PlayerTracker initialized");
 
-        // Create player quit listener
+        // Create player event listeners
+        playerJoinListener = new PlayerJoinListener(playerTracker);
+        LOGGER.info("PlayerJoinListener initialized");
+
         playerQuitListener = new PlayerQuitListener(playerTracker);
         LOGGER.info("PlayerQuitListener initialized");
     }
@@ -148,6 +158,7 @@ public final class QuetzalMapPlugin extends JavaPlugin {
      */
     private void registerListeners() {
         Bukkit.getPluginManager().registerEvents(chunkListener, this);
+        Bukkit.getPluginManager().registerEvents(playerJoinListener, this);
         Bukkit.getPluginManager().registerEvents(playerQuitListener, this);
         LOGGER.info("Event listeners registered");
     }

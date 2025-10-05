@@ -1,6 +1,7 @@
-import { MapContainer, TileLayer, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, useMapEvents, useMap } from 'react-leaflet';
 import { useState, useEffect } from 'react';
 import L from 'leaflet';
+import type { Map as LeafletMap } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import ScaleBar from './ScaleBar';
 import { PlayerMarkers } from './PlayerMarkers';
@@ -13,24 +14,34 @@ interface MapProps {
   center?: [number, number];
   events?: SSEEvent[];
   onScaleUpdate?: (width: number, text: string) => void;
+  mapRef?: React.MutableRefObject<LeafletMap | null>;
 }
 
 /**
  * Custom CRS for 512px tiles with proper zoom scaling
  * Extends CRS.Simple to handle 512x512 tiles correctly
+ *
+ * Coordinate system:
+ * - Each tile = 512×512 pixels = 512×512 blocks (one region file)
+ * - Minecraft coordinates (blocks) map directly to pixels at zoom 0
+ * - Transformation converts Minecraft (lng=X, lat=Z) to pixel space
  */
 const QuetzalCRS = L.extend({}, L.CRS.Simple, {
-  transformation: new L.Transformation(1, 0, 1, 0),
+  // Transformation converts Minecraft coordinates to pixel coordinates
+  // Scale by 1 (1 block = 1 pixel at zoom 0), no offset
+  transformation: new L.Transformation(1, 0, -1, 0),
 
   scale: function(zoom: number) {
-    // Scale function for 512px tiles: 512 * 2^zoom
-    // This ensures tiles scale correctly at all zoom levels
-    return 512 * Math.pow(2, zoom);
+    // Scale function: pixels per block at given zoom level
+    // At zoom 0: 1 block = 1 pixel
+    // At zoom 1: 1 block = 2 pixels (zoomed in)
+    // At zoom -1: 1 block = 0.5 pixels (zoomed out)
+    return Math.pow(2, zoom);
   },
 
   zoom: function(scale: number) {
     // Inverse scale function: converts scale back to zoom level
-    return Math.log(scale / 512) / Math.LN2;
+    return Math.log(scale) / Math.LN2;
   }
 });
 
@@ -44,6 +55,47 @@ function ZoomTracker({ onZoomChange }: { onZoomChange: (zoom: number) => void })
       onZoomChange(e.target.getZoom());
     }
   });
+  return null;
+}
+
+/**
+ * Mouse coordinates display component
+ * Shows Minecraft coordinates at cursor position
+ */
+function MouseCoordinates() {
+  const [coords, setCoords] = useState<{ x: number; z: number } | null>(null);
+
+  useMapEvents({
+    mousemove: (e) => {
+      // Leaflet gives us coordinates in the CRS coordinate space
+      // lat is negated by CRS transformation, lng is X coordinate
+      setCoords({
+        x: Math.round(e.latlng.lng),
+        z: Math.round(e.latlng.lat)
+      });
+    },
+    mouseout: () => {
+      setCoords(null);
+    }
+  });
+
+  if (!coords) return null;
+
+  return (
+    <div className="absolute bottom-4 left-4 z-[1000] bg-black/70 text-white px-3 py-1.5 rounded text-sm font-mono pointer-events-none">
+      X: {coords.x}, Z: {coords.z}
+    </div>
+  );
+}
+
+/**
+ * Component to expose map instance to parent via ref
+ */
+function MapRefSetter({ mapRef }: { mapRef: React.MutableRefObject<LeafletMap | null> }) {
+  const map = useMap();
+  useEffect(() => {
+    mapRef.current = map;
+  }, [map, mapRef]);
   return null;
 }
 
@@ -118,7 +170,8 @@ export default function Map({
   zoom = 0,
   center = [0, 0],
   events = [],
-  onScaleUpdate
+  onScaleUpdate,
+  mapRef
 }: MapProps) {
   return (
     <MapContainer
@@ -129,9 +182,11 @@ export default function Map({
       minZoom={-3}
       maxZoom={3}
     >
+      {mapRef && <MapRefSetter mapRef={mapRef} />}
       <QuetzalTileLayer apiUrl={apiUrl} world={world} />
       {onScaleUpdate && <ScaleBar onUpdate={onScaleUpdate} />}
       <PlayerMarkers events={events} world={world} />
+      <MouseCoordinates />
     </MapContainer>
   );
 }

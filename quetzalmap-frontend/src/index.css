@@ -18,5 +18,22 @@ body {
 .leaflet-container {
   width: 100%;
   height: 100%;
-  background-color: #111827;
+  background-color: #f3f4f6; /* Light gray for light mode */
+}
+
+/* Dark mode: darker background for undiscovered tiles */
+@media (prefers-color-scheme: dark) {
+  .leaflet-container {
+    background-color: #111827; /* Dark gray for dark mode */
+  }
+}
+
+/* Player head marker styling */
+.player-head-marker {
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  border: 2px solid white;
+  image-rendering: pixelated; /* Preserve Minecraft's pixel art style */
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
 }

@@ -19,19 +19,19 @@ interface PlayerMarkersProps {
 }
 
 /**
- * Player marker icon
+ * Create a player head icon using Crafatar API
  */
-const playerIcon = new L.Icon({
-  iconUrl: 'data:image/svg+xml;base64,' + btoa(`
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-      <circle cx="12" cy="12" r="10" fill="#4A90E2" stroke="#ffffff" stroke-width="2"/>
-      <path d="M12 8 L14 14 L12 12 L10 14 Z" fill="#ffffff"/>
-    </svg>
-  `),
-  iconSize: [24, 24],
-  iconAnchor: [12, 12],
-  tooltipAnchor: [0, -12]
-});
+const createPlayerHeadIcon = (uuid: string) => {
+  return new L.Icon({
+    // Use Crafatar for reliable Minecraft head rendering
+    // size=32 for crisp rendering at 24x24 display size
+    iconUrl: `https://crafatar.com/avatars/${uuid}?size=32&overlay`,
+    iconSize: [24, 24],
+    iconAnchor: [12, 12],
+    tooltipAnchor: [0, -12],
+    className: 'player-head-marker'
+  });
+};
 
 /**
  * Displays player markers on the map from SSE events.
@@ -87,8 +87,8 @@ export const PlayerMarkers: React.FC<PlayerMarkersProps> = ({ events, world }) =
       {Array.from(players.values()).map(player => (
         <Marker
           key={player.uuid}
-          position={[player.z, player.x]}
-          icon={playerIcon}
+          position={[-player.z, player.x]}
+          icon={createPlayerHeadIcon(player.uuid)}
         >
           <Tooltip direction="top" permanent={false}>
             <div>

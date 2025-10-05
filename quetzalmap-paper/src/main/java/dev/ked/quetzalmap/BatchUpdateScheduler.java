@@ -107,7 +107,7 @@ public final class BatchUpdateScheduler {
         // Process dirty tiles asynchronously
         int dirtyCount = tileManager.getDirtyCount();
         if (dirtyCount > 0) {
-            LOGGER.info("Processing " + dirtyCount + " dirty tiles");
+            LOGGER.fine("Processing " + dirtyCount + " dirty tiles");
 
             // Get world directory for rendering
             // Note: Assumes single world for now - TODO: multi-world support

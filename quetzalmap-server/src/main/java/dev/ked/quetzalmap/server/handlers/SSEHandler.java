@@ -43,19 +43,31 @@ public final class SSEHandler implements HttpHandler {
 
             // Set close listener
             exchange.addExchangeCompleteListener((ex, nextListener) -> {
+                LOGGER.fine("SSE connection " + connection.getId() + " closed");
                 sseManager.unregisterConnection(connection);
                 nextListener.proceed();
             });
 
-            // Keep connection open (will be closed by client or server shutdown)
-            // Don't call endExchange() - keep it persistent
+            // CRITICAL: Block this thread to keep the connection alive
+            // The connection will be closed when:
+            // 1. Client disconnects
+            // 2. Server shuts down
+            // 3. Connection times out
+            // 4. An error occurs while sending events
+            connection.awaitClose();
 
         } catch (Exception e) {
             LOGGER.severe("Error handling SSE connection: " + e.getMessage());
             e.printStackTrace();
-            exchange.setStatusCode(StatusCodes.INTERNAL_SERVER_ERROR);
-            exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/plain");
-            exchange.getResponseSender().send("Internal server error");
+
+            // Try to send error response
+            try {
+                exchange.setStatusCode(StatusCodes.INTERNAL_SERVER_ERROR);
+                exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "text/plain");
+                exchange.getResponseSender().send("Internal server error: " + e.getMessage());
+            } catch (Exception e2) {
+                LOGGER.severe("Failed to send error response: " + e2.getMessage());
+            }
         }
     }
 }

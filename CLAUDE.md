@@ -1,323 +1,360 @@
-# QuetzalMap - Custom Minimap Plugin Implementation Plan
+# QuetzalMap - Development Documentation
 
 ## Overview
-QuetzalMap is a custom minimap plugin for the Quetzal server that provides players with a large-area map view using Minecraft's native map items. The plugin is designed to integrate seamlessly with all Quetzal server plugins to display real-time information about storms, shops, transporters, dungeons, and events.
 
-## Core Features
+QuetzalMap is a real-time web-based live map plugin for Minecraft Paper 1.21.3+ servers. It provides both a web interface and in-game map functionality for visualizing the Minecraft world, player positions, and plugin integrations.
 
-### 1. Map System
-- **Large Area Coverage**: Display a significantly larger area than vanilla maps (configurable radius)
-- **Auto-Update**: Real-time map updates as players move
-- **Player Tracking**: Show player position and direction on the map
-- **Spawn Item**: All players receive a map item on join (configurable)
-- **Multi-World Support**: Different maps for different worlds
+## Current Implementation Status
 
-### 2. Map Rendering
-- **Base Terrain**: Render the world terrain using Minecraft's native map rendering
-- **Custom Overlays**: Layer system for adding markers and icons on top of terrain
-- **Icon System**: Custom pixel art icons for different marker types
-- **Color Coding**: Use map colors to differentiate marker types
-- **Update Rate**: Configurable update frequency (default: 1 tick for smooth updates)
+### ✅ Completed Features
 
-### 3. Marker Types
-All markers should be toggleable via player preferences:
-- **Storms**: Active storm positions with direction indicators
-- **Shops**: Bazaar locations
-- **Transporters**: SilkRoad transporter stations
-- **Trade Posts**: SilkRoad trade post locations
-- **Dungeons**: StormcraftDungeons entry points
-- **Events**: StormcraftEvents active event locations
-- **Custom POIs**: Admin-defined points of interest
+**Web Map System:**
+- Real-time tile rendering from Minecraft world data (512×512 pixel tiles)
+- Embedded Undertow web server on port 8123
+- React + TypeScript + Leaflet.js frontend
+- Server-Sent Events (SSE) for live updates
+- Custom CRS (Coordinate Reference System) for proper Minecraft coordinate mapping
+- Dynamic scale bar showing distance in blocks
+- Multi-world support (Overworld, Nether, End)
+- Smooth zoom/pan with tile caching
 
-## Plugin Integrations
+**Player Tracking:**
+- Real-time player position updates via SSE
+- Player markers using Minecraft character heads (Crafatar API)
+- Live player list panel with join/leave events
+- Click-to-center player location
+- Player count indicator with real-time updates
+- Player head avatars in player list
 
-### Stormcraft Integration
-**Purpose**: Display active storms on the map with movement indicators
+**Performance Optimizations:**
+- Caffeine caching for tile data
+- Async tile rendering
+- Batch chunk update processing
+- SSE connection management
+- Region file caching
+- Clean logging (spam reduced to FINE level)
 
-**Integration Points**:
-- Hook into Stormcraft's storm tracking system
-- Get storm center coordinates
-- Get storm radius/size
-- Get storm movement vector (direction and speed)
-- Get storm type (for different visual representations)
+### 🚧 In Development
 
-**Map Display**:
-- Storm center marked with unique icon
-- Storm radius shown as colored circle/area
-- Movement arrow indicating storm direction
-- Color-coded by storm severity/type
+**In-Game Map:**
+- Minimap using Minecraft map items
+- Custom map renderer integration
+- Marker system for in-game display
 
-**API Requirements**:
-```java
-// Need from Stormcraft:
-- List<Storm> getActiveStorms()
-- Location getStormCenter(Storm storm)
-- double getStormRadius(Storm storm)
-- Vector getStormVelocity(Storm storm)
-- StormType getStormType(Storm storm)
+**Plugin Integrations:**
+- Stormcraft: Live storm tracking markers
+- Bazaar: Shop location markers
+- SilkRoad: Transporter and trade post markers
+- StormcraftDungeons: Dungeon portal markers
+- StormcraftEvents: Event location markers
+
+## Architecture
+
+### Multi-Module Maven Project
+
+```
+quetzalmap/
+├─ quetzalmap-core/       # Platform-agnostic world parsing
+│   ├─ Anvil region file parser (Querz NBT)
+│   ├─ Chunk decompression (LZ4)
+│   ├─ Color calculation for blocks
+│   └─ World data abstractions
+│
+├─ quetzalmap-web/        # Tile rendering engine
+│   ├─ TileRenderer - Converts chunks to 512×512 PNG tiles
+│   ├─ TileManager - Caching and dirty tracking
+│   ├─ ChunkPixelDataPool - Object pooling for performance
+│   └─ TilePreGenerator - Background tile generation
+│
+├─ quetzalmap-server/     # Embedded web server
+│   ├─ WebServer - Undertow HTTP server
+│   ├─ TileHandler - Serves PNG tiles
+│   ├─ SSEManager - Server-Sent Events broadcasting
+│   ├─ SSEConnection - Individual SSE client connections
+│   └─ WorldsHandler - World discovery API
+│
+├─ quetzalmap-paper/      # Paper plugin implementation
+│   ├─ QuetzalMapPlugin - Main plugin class
+│   ├─ PlayerTracker - Player position tracking
+│   ├─ PlayerJoinListener - Broadcasts player join events
+│   ├─ PlayerQuitListener - Broadcasts player leave events
+│   ├─ ChunkEventListener - Tracks chunk changes
+│   ├─ BatchUpdateScheduler - Debounces chunk updates
+│   └─ WorldAdapter - Bukkit world → file system bridge
+│
+├─ quetzalmap-ingame/     # In-game map features (planned)
+│   └─ Custom map renderer for minimap
+│
+└─ quetzalmap-frontend/   # React web interface
+    ├─ src/
+    │   ├─ components/
+    │   │   ├─ Map.tsx - Leaflet map container
+    │   │   ├─ PlayerMarkers.tsx - Live player markers
+    │   │   ├─ PlayerListPanel.tsx - Player list UI
+    │   │   ├─ MapControls.tsx - UI controls
+    │   │   └─ ScaleBar.tsx - Distance indicator
+    │   └─ hooks/
+    │       └─ useSSE.ts - SSE connection hook
+    └─ Build: Vite + TypeScript
 ```
 
-### Bazaar Integration
-**Purpose**: Show shop locations on the map
+### Technology Stack
 
-**Integration Points**:
-- Get all active shop locations
-- Get shop owner/name
-- Get shop type (if applicable)
-- Listen for shop creation/deletion events
+**Backend:**
+- Java 21
+- Paper API 1.21.3+
+- Undertow (embedded web server)
+- Caffeine (in-memory caching)
+- Querz NBT (region file parsing)
+- LZ4 Java (chunk decompression)
 
-**Map Display**:
-- Shop icon at shop location
-- Different colors for different shop types
-- Clickable for more info (if hovering supported)
+**Frontend:**
+- TypeScript
+- React 18
+- Leaflet.js
+- Vite (build tool)
+- TailwindCSS
 
-**API Requirements**:
-```java
-// Need from Bazaar:
-- List<Shop> getAllShops()
-- Location getShopLocation(Shop shop)
-- String getShopName(Shop shop)
-- UUID getShopOwner(Shop shop)
+### Data Flow
+
+```
+1. Minecraft World (.mca region files)
+   ↓
+2. quetzalmap-core (RegionCache, chunk parsing)
+   ↓
+3. quetzalmap-web (TileRenderer → 512×512 PNG)
+   ↓
+4. quetzalmap-server (Undertow serves tiles via HTTP)
+   ↓
+5. quetzalmap-frontend (Leaflet displays tiles)
+
+Real-time updates:
+1. Player moves (Bukkit event)
+   ↓
+2. PlayerTracker (batches updates every 1 second)
+   ↓
+3. SSEManager (broadcasts to all connected clients)
+   ↓
+4. Frontend SSE hook (updates React state)
+   ↓
+5. PlayerMarkers component (moves marker on map)
 ```
 
-### SilkRoad Integration
-**Purpose**: Display transporters and trade posts
+## SSE Event Types
 
-**Integration Points**:
-- Get all transporter station locations
-- Get all trade post locations
-- Get transporter network connections
-- Get trade post status (active/inactive)
+The plugin broadcasts these Server-Sent Events:
 
-**Map Display**:
-- Transporter stations with unique icon
-- Trade posts with unique icon
-- Optional: Lines connecting transporter network routes
-- Color coding for trade post status
-
-**API Requirements**:
-```java
-// Need from SilkRoad:
-- List<Transporter> getAllTransporters()
-- List<TradePost> getAllTradePosts()
-- Location getTransporterLocation(Transporter t)
-- Location getTradePostLocation(TradePost tp)
-- boolean isTradePostActive(TradePost tp)
+### `player_list`
+Initial player list sent when client connects.
+```json
+{
+  "players": [
+    {
+      "uuid": "...",
+      "name": "PlayerName",
+      "x": 100.5,
+      "y": 64.0,
+      "z": -200.3,
+      "yaw": 90.0,
+      "world": "world"
+    }
+  ]
+}
 ```
 
-### StormcraftEvents Integration
-**Purpose**: Show active server events on the map
-
-**Integration Points**:
-- Get active event locations
-- Get event type
-- Get event duration/time remaining
-- Listen for event start/end
-
-**Map Display**:
-- Event location with unique icon
-- Different colors/icons per event type
-- Pulsing/animated effect for active events
-
-**API Requirements**:
-```java
-// Need from StormcraftEvents:
-- List<Event> getActiveEvents()
-- Location getEventLocation(Event event)
-- EventType getEventType(Event event)
-- long getTimeRemaining(Event event)
+### `player_join`
+Broadcast when a player joins the server.
+```json
+{
+  "uuid": "...",
+  "name": "PlayerName",
+  "x": 0.0,
+  "y": 64.0,
+  "z": 0.0,
+  "yaw": 0.0,
+  "world": "world"
+}
 ```
 
-### StormcraftDungeons Integration
-**Purpose**: Display dungeon entrance locations
-
-**Integration Points**:
-- Get all dungeon entrance locations
-- Get dungeon name/type
-- Get dungeon difficulty
-- Get dungeon status (available/in-use)
-
-**Map Display**:
-- Dungeon entrance icon
-- Color-coded by difficulty
-- Visual indicator if dungeon is occupied
-
-**API Requirements**:
-```java
-// Need from StormcraftDungeons:
-- List<Dungeon> getAllDungeons()
-- Location getDungeonEntrance(Dungeon dungeon)
-- String getDungeonName(Dungeon dungeon)
-- DungeonDifficulty getDifficulty(Dungeon dungeon)
-- boolean isDungeonOccupied(Dungeon dungeon)
+### `player_moved`
+Broadcast when a player moves >5 blocks (throttled to 1/sec per player).
+```json
+{
+  "uuid": "...",
+  "name": "PlayerName",
+  "x": 105.2,
+  "y": 65.0,
+  "z": -195.8,
+  "yaw": 135.0,
+  "world": "world"
+}
 ```
 
-## Technical Architecture
+### `player_disconnect`
+Broadcast when a player leaves.
+```json
+{
+  "uuid": "...",
+  "name": "PlayerName"
+}
+```
 
-### Core Components
+### `tile_update`
+Broadcast when a chunk changes and tile is re-rendered.
+```json
+{
+  "type": "tile_update",
+  "world": "world",
+  "zoom": 0,
+  "x": 10,
+  "z": -5
+}
+```
 
-#### 1. MapManager
-- Manages map instances for all online players
-- Handles map creation and distribution
-- Coordinates update cycles
-- Manages map data caching
+## Coordinate System
 
-#### 2. MapRenderer (extends MapRenderer)
-- Custom Bukkit MapRenderer implementation
-- Renders base terrain
-- Renders overlay markers
-- Handles player position updates
+**Minecraft Coordinates → Leaflet Coordinates:**
+- Minecraft X → Leaflet lng (longitude)
+- Minecraft Z → Leaflet lat (latitude, negated)
+- Leaflet position: `[-z, x]`
 
-#### 3. MarkerManager
-- Centralized marker registration system
-- Manages all marker types and positions
-- Handles marker visibility toggles
-- Provides marker update events
+**Tile Coordinates:**
+- Each tile = 512×512 pixels = 512×512 blocks (at zoom 0)
+- Tile files named: `{x}_{z}.png`
+- Tile coordinates map directly to Minecraft region file coordinates
+- Example: `2656_-2158.png` = region file `r.2656.-2158.mca`
 
-#### 4. IntegrationManager
-- Manages soft dependencies on other plugins
-- Provides abstraction layer for plugin integrations
-- Handles graceful degradation if plugins not present
-- Registers event listeners for integrated plugins
+**Custom CRS (Map.tsx):**
+```typescript
+const QuetzalCRS = L.extend({}, L.CRS.Simple, {
+  transformation: new L.Transformation(1, 0, -1, 0),
+  scale: (zoom) => Math.pow(2, zoom),
+  zoom: (scale) => Math.log(scale) / Math.LN2
+});
+```
 
-#### 5. PlayerMapData
-- Per-player map configuration
-- Marker visibility preferences
-- Map zoom level
-- Custom waypoints
+## Performance Characteristics
 
-#### 6. IconRegistry
-- Stores pixel art icons for all marker types
-- Provides icon rendering utilities
-- Handles icon scaling and rotation
+**Tile Rendering:**
+- First render: ~50-100ms per 512×512 tile
+- Cached tiles: <1ms (served from disk)
+- Region cache: Significant speedup (avoids repeated NBT parsing)
 
-### Configuration Structure
+**Web Server:**
+- Undertow: Low overhead, handles 50+ concurrent connections
+- SSE keepalive: ~2KB/s per connected client
+- Tile serving: Cached with ETag/If-None-Match (304 Not Modified)
 
+**Memory Usage:**
+- Base plugin: ~100-200MB
+- Tile cache: ~500MB for 10,000 tiles
+- Region cache: ~50MB per cached region
+- Per-connection SSE: ~10KB
+
+**Update Batching:**
+- Chunk updates: Batched every 100ms (2 ticks)
+- Player movement: Throttled to 1/sec per player, >5 block threshold
+- SSE broadcasts: Immediate (no batching)
+
+## Configuration
+
+**Plugin Config** (`plugins/QuetzalMap/config.yml`):
 ```yaml
-quetzalmap:
-  # Map Settings
-  map:
-    auto-give-on-join: true
-    map-radius: 1024  # blocks from center
-    update-rate: 1  # ticks between updates
-    zoom-levels:
-      - 512
-      - 1024
-      - 2048
-      - 4096
+# Web server settings
+server:
+  host: "0.0.0.0"
+  port: 8123
 
-  # Marker Settings
-  markers:
-    storms:
-      enabled: true
-      show-direction: true
-      show-radius: true
-      color: RED
-    shops:
-      enabled: true
-      color: GREEN
-    transporters:
-      enabled: true
-      color: BLUE
-    trade-posts:
-      enabled: true
-      color: YELLOW
-    events:
-      enabled: true
-      color: PURPLE
-    dungeons:
-      enabled: true
-      color: DARK_RED
+# Rendering settings
+rendering:
+  tile-size: 512
+  zoom-levels: 1
 
-  # Integration Settings
-  integrations:
-    stormcraft:
-      enabled: true
-      update-interval: 20  # ticks
-    bazaar:
-      enabled: true
-      max-shops-displayed: 100
-    silkroad:
-      enabled: true
-    stormcraft-events:
-      enabled: true
-    stormcraft-dungeons:
-      enabled: true
+# World settings
+worlds:
+  - world
+  - world_nether
+  - world_the_end
 
-  # Performance Settings
-  performance:
-    async-rendering: true
-    cache-terrain: true
-    max-markers-per-map: 500
+# Map display
+map:
+  default-zoom: 0
+  min-zoom: -3
+  max-zoom: 3
 ```
 
-## Implementation Phases
+**Frontend Config** (`.env`):
+```env
+VITE_API_URL=http://your-server-ip:8123
+```
 
-### Phase 1: Core Map System
-1. Create plugin structure and build configuration
-2. Implement MapManager and basic map distribution
-3. Create custom MapRenderer for terrain rendering
-4. Implement player position tracking and display
-5. Add basic map item handling (prevent dropping, etc.)
+## Development Workflow
 
-### Phase 2: Marker System
-1. Implement MarkerManager with registration API
-2. Create IconRegistry and basic icon rendering
-3. Implement marker overlay rendering on maps
-4. Add marker visibility toggles
-5. Create player preferences system
+### Building
 
-### Phase 3: Stormcraft Integration
-1. Create Stormcraft integration module
-2. Hook into storm tracking system
-3. Implement storm marker rendering
-4. Add storm direction indicators
-5. Add storm radius visualization
+```bash
+# Build backend
+cd /var/repos/QuetzalMap
+mvn clean package
 
-### Phase 4: Shop & Economy Integrations
-1. Create Bazaar integration module
-2. Implement shop marker system
-3. Create SilkRoad integration module
-4. Add transporter markers
-5. Add trade post markers
+# Deploy to server
+cp quetzalmap-paper/target/QuetzalMap-*.jar \
+   /var/lib/pterodactyl/volumes/{server-id}/plugins/
 
-### Phase 5: Event & Dungeon Integrations
-1. Create StormcraftEvents integration module
-2. Implement event markers with animations
-3. Create StormcraftDungeons integration module
-4. Add dungeon entrance markers
-5. Implement difficulty-based color coding
+# Build frontend
+cd quetzalmap-frontend
+npm install
+npm run build
 
-### Phase 6: Polish & Optimization
-1. Performance optimization (async rendering, caching)
-2. Add player commands (/map toggle, /map zoom, etc.)
-3. Implement permission system
-4. Add configuration reload support
-5. Create comprehensive documentation
+# Serve frontend (development)
+python3 -m http.server 7825 --bind 0.0.0.0 --directory dist
+```
 
-## Commands & Permissions
+### Testing
 
-### Commands
-- `/qmap` - Main command
-  - `/qmap toggle <marker-type>` - Toggle marker visibility
-  - `/qmap zoom <level>` - Change map zoom level
-  - `/qmap reload` - Reload configuration (admin)
-  - `/qmap give <player>` - Give map to player (admin)
-  - `/qmap info` - Show map info and active markers
+**Backend:**
+1. Start Paper server with QuetzalMap installed
+2. Check logs for "QuetzalMap enabled successfully!"
+3. Verify web server: `http://localhost:8123`
+4. Test SSE: `curl http://localhost:8123/events`
 
-### Permissions
-- `quetzalmap.use` - Basic map usage (default: true)
-- `quetzalmap.toggle` - Toggle marker types
-- `quetzalmap.zoom` - Change zoom levels
-- `quetzalmap.admin` - Admin commands (reload, give)
-- `quetzalmap.markers.*` - See all marker types
-  - `quetzalmap.markers.storms`
-  - `quetzalmap.markers.shops`
-  - `quetzalmap.markers.transporters`
-  - `quetzalmap.markers.events`
-  - `quetzalmap.markers.dungeons`
+**Frontend:**
+1. Build frontend: `npm run build`
+2. Serve: `python3 -m http.server 7825 --directory dist`
+3. Open browser: `http://localhost:7825`
+4. Check console for SSE connection
+5. Verify tiles load and player markers appear
 
-## API for Other Plugins
+### Debugging
+
+**Common Issues:**
+
+**Tiles not loading:**
+- Check `plugins/QuetzalMap/tiles/` exists
+- Verify world directory is correct
+- Check server logs for render errors
+- Ensure port 8123 is accessible
+
+**SSE not connecting:**
+- Check browser console for CORS errors
+- Verify SSEManager is initialized
+- Check firewall allows port 8123
+- Test with: `curl http://server:8123/events`
+
+**Player markers not showing:**
+- Check PlayerTracker is running (logs every 1 sec)
+- Verify player UUID format
+- Check Crafatar API is accessible
+- Test: `https://crafatar.com/avatars/{uuid}`
+
+**Coordinate issues:**
+- Verify CRS transformation is correct
+- Check player position uses `[-z, x]`
+- Ensure tile coordinates match region files
+
+## Plugin Integration Points (Planned)
+
+### API Design
 
 ```java
 public interface QuetzalMapAPI {
@@ -327,146 +364,108 @@ public interface QuetzalMapAPI {
     void registerMarkerType(String id, MarkerType type);
 
     /**
-     * Add a marker to all maps
+     * Add a marker to the map
      */
     void addMarker(Marker marker);
 
     /**
-     * Remove a marker from all maps
+     * Remove a marker
      */
     void removeMarker(String markerId);
 
     /**
-     * Update marker position
+     * Broadcast a custom update
      */
-    void updateMarker(String markerId, Location newLocation);
-
-    /**
-     * Get all active markers of a type
-     */
-    List<Marker> getMarkers(String type);
+    void broadcastUpdate(String eventType, String jsonData);
 }
 ```
 
-## Dependencies
+### Integration Examples
 
-### Required
-- Paper API 1.21.3+
-- Java 21+
+**Stormcraft:**
+```java
+// Listen for storm start event
+@EventHandler
+public void onStormStart(StormcraftStormStartEvent event) {
+    Storm storm = event.getStorm();
+    Location center = storm.getCenter();
 
-### Soft Dependencies (Integrations)
-- Stormcraft (for storm markers)
-- Bazaar (for shop markers)
-- SilkRoad (for transporter/trade post markers)
-- StormcraftEvents (for event markers)
-- StormcraftDungeons (for dungeon markers)
-
-## Technical Considerations
-
-### Performance
-- **Async Rendering**: Render map frames asynchronously to avoid main thread lag
-- **Caching**: Cache terrain data to reduce re-rendering
-- **Update Throttling**: Limit marker update frequency per plugin
-- **Distance Culling**: Only render markers within map bounds
-- **Marker Limits**: Cap maximum markers per map to prevent lag
-
-### Map Rendering Details
-- Use Bukkit's MapCanvas for pixel manipulation
-- Map resolution: 128x128 pixels
-- Each pixel can display one of 256 colors
-- Custom markers drawn as pixel art overlays
-- Player position uses cursor system or pixel overlay
-
-### Data Storage
-- Player preferences stored in YAML (lightweight)
-- No database required (all data is ephemeral or config-based)
-- Marker data pulled from integrated plugins in real-time
-
-### Update Strategy
-- **Terrain**: Update only when player moves significantly
-- **Player Position**: Update every tick for smooth movement
-- **Markers**: Update based on integration plugin events
-- **Storms**: High frequency updates (every 20 ticks) for movement tracking
+    // Broadcast to web map
+    quetzalMapAPI.broadcastUpdate("storm_start",
+        String.format("{\"x\":%.2f,\"z\":%.2f,\"radius\":%d}",
+            center.getX(), center.getZ(), storm.getRadius()));
+}
+```
 
 ## Future Enhancements
 
-### Possible Future Features
-1. **Waypoint System**: Players can set custom waypoints
-2. **Shared Maps**: Party/guild shared map views
-3. **Map History**: Record and replay storm paths
-4. **3D Terrain**: Height-based shading for terrain
-5. **Night/Day Cycle**: Map colors change based on time
-6. **Biome Coloring**: Enhanced biome visualization
-7. **Mob Tracking**: Optional hostile mob markers
-8. **Death Markers**: Show player death locations
-9. **Claims Integration**: Show WorldGuard/Land claims
-10. **Web Map Export**: Export map data to web viewer
+### Planned Features
 
-## Development Notes
+**Short-term (1-2 weeks):**
+- Multiple zoom levels (downsampled tiles)
+- Chunk update notifications (real-time tile refresh)
+- Storm markers (Stormcraft integration)
+- Shop markers (Bazaar integration)
 
-### Icon Design
-All icons should be 8x8 or 16x16 pixel art:
-- **Storm**: Swirling cloud with lightning bolt
-- **Shop**: Small building/chest icon
-- **Transporter**: Portal/telepad icon
-- **Trade Post**: Trading stand/booth icon
-- **Event**: Star/exclamation mark
-- **Dungeon**: Skull/crossed swords icon
-- **Player**: Arrow or circle
+**Medium-term (1-2 months):**
+- In-game minimap using Minecraft map items
+- WorldGuard region overlays
+- Towny town boundaries
+- Custom waypoint system
 
-### Color Palette
-Use Minecraft map colors for consistency:
-- RED: Storms (danger)
-- GREEN: Shops (economy)
-- BLUE: Transporters (travel)
-- YELLOW: Trade Posts (commerce)
-- PURPLE: Events (special)
-- DARK_RED: Dungeons (challenge)
-- WHITE: Player position
+**Long-term (3+ months):**
+- 3D terrain rendering
+- Historical storm path playback
+- Multi-server map aggregation
+- Mobile app companion
 
-## Integration Testing Plan
+## Maintenance
 
-### Test Cases
-1. **Stormcraft**: Create test storms, verify marker position/movement
-2. **Bazaar**: Create/delete shops, verify markers appear/disappear
-3. **SilkRoad**: Test transporter/trade post markers
-4. **StormcraftEvents**: Start/stop events, verify markers
-5. **StormcraftDungeons**: Test dungeon markers and status updates
-6. **Performance**: Test with 50+ players and 100+ markers
-7. **Cross-Plugin**: Test all integrations simultaneously
+### Log Levels
 
-## Success Criteria
+All verbose logs are set to `LOGGER.fine()` to reduce spam:
+- SSE connection events
+- Player tracking updates
+- Tile rendering progress
+- Batch update processing
 
-The plugin will be considered successful when:
-1. ✅ All players receive a map on join
-2. ✅ Map shows player position in real-time
-3. ✅ All 5 plugin integrations working
-4. ✅ Storms visible with direction indicators
-5. ✅ No noticeable server lag from map updates
-6. ✅ Players can toggle marker types
-7. ✅ Configuration fully customizable
-8. ✅ Map updates smoothly as player moves
+To enable verbose logging:
+```yaml
+# bukkit.yml or paper-global.yml
+logging:
+  level: FINE
+```
 
-## Timeline Estimate
+### Performance Monitoring
 
-- **Phase 1**: 2-3 hours (Core map system)
-- **Phase 2**: 2-3 hours (Marker system)
-- **Phase 3**: 1-2 hours (Stormcraft integration)
-- **Phase 4**: 2-3 hours (Shop & economy integrations)
-- **Phase 5**: 2-3 hours (Event & dungeon integrations)
-- **Phase 6**: 1-2 hours (Polish & optimization)
+Watch for:
+- TPS drops when rendering many tiles
+- Memory growth from region cache
+- SSE connection leaks
+- Excessive tile re-rendering
 
-**Total**: 10-16 hours of development time
+### Updating
 
-## Support & Maintenance
+When updating the plugin:
+1. Build new JAR: `mvn clean package`
+2. Stop server or use `/reload confirm`
+3. Replace JAR in plugins folder
+4. Restart server
+5. Verify web server starts on port 8123
+6. Test SSE connection and tile loading
 
-### Versioning
-- Follow semantic versioning (MAJOR.MINOR.PATCH)
-- Maintain compatibility with Paper 1.21.3+
-- Update when integrated plugins have breaking API changes
+## Credits
 
-### Documentation
-- Comprehensive README.md with setup instructions
-- JavaDoc for all public API methods
-- Configuration comments for all settings
-- Integration guide for plugin developers
+- **Querz NBT Library** - Region file parsing
+- **Leaflet.js** - Interactive map library
+- **Undertow** - Embedded web server
+- **Caffeine** - High-performance caching
+- **Crafatar** - Minecraft avatar API
+
+## License
+
+MIT License - See LICENSE file for details
+
+---
+
+**Developed by Kyle Edward Donaldson for Quetzal's Stormcraft Server**

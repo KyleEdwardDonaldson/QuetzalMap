@@ -89,15 +89,6 @@ public final class TileHandler implements HttpHandler {
      */
     private void serveTileFromDisk(HttpServerExchange exchange, Path tilePath) {
         try {
-            // Read tile data (fast - tiles are small and likely in OS page cache)
-            byte[] tileData = Files.readAllBytes(tilePath);
-
-            // Set response headers
-            exchange.setStatusCode(StatusCodes.OK);
-            exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "image/png");
-            exchange.getResponseHeaders().put(Headers.CONTENT_LENGTH, tileData.length);
-            exchange.getResponseHeaders().put(Headers.CACHE_CONTROL, "public, max-age=300"); // 5 min cache
-
             // Add ETag for browser caching
             String etag = "\"" + tilePath.getFileName().toString() + "-" + Files.getLastModifiedTime(tilePath).toMillis() + "\"";
             exchange.getResponseHeaders().put(Headers.ETAG, etag);
@@ -110,14 +101,31 @@ public final class TileHandler implements HttpHandler {
                 return;
             }
 
-            // Send tile data
+            // Check if response already started (shouldn't happen, but be defensive)
+            if (exchange.isResponseStarted()) {
+                LOGGER.fine("Response already started for tile: " + tilePath);
+                return;
+            }
+
+            // Read tile data (fast - tiles are small and likely in OS page cache)
+            byte[] tileData = Files.readAllBytes(tilePath);
+
+            // Set response headers BEFORE starting blocking mode
+            exchange.setStatusCode(StatusCodes.OK);
+            exchange.getResponseHeaders().put(Headers.CONTENT_TYPE, "image/png");
+            exchange.getResponseHeaders().put(Headers.CONTENT_LENGTH, tileData.length);
+            exchange.getResponseHeaders().put(Headers.CACHE_CONTROL, "public, max-age=300"); // 5 min cache
+
+            // Start blocking mode and send tile data
             exchange.startBlocking();
             exchange.getOutputStream().write(tileData);
             exchange.getOutputStream().close();
 
         } catch (IOException e) {
             LOGGER.warning("Failed to read tile from disk: " + tilePath);
-            sendError(exchange, StatusCodes.INTERNAL_SERVER_ERROR, "Failed to read tile");
+            if (!exchange.isResponseStarted()) {
+                sendError(exchange, StatusCodes.INTERNAL_SERVER_ERROR, "Failed to read tile");
+            }
         }
     }
 

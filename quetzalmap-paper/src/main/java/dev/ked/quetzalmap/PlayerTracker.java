@@ -105,6 +105,35 @@ public class PlayerTracker extends BukkitRunnable {
     }
 
     /**
+     * Send player join event.
+     */
+    public void onPlayerJoin(Player player) {
+        Location loc = player.getLocation();
+        PlayerPosition pos = new PlayerPosition(
+                loc.getX(),
+                loc.getY(),
+                loc.getZ(),
+                loc.getYaw(),
+                loc.getWorld().getName()
+        );
+
+        lastPositions.put(player.getUniqueId(), pos);
+
+        String json = String.format(
+                "{\"uuid\":\"%s\",\"name\":\"%s\",\"x\":%.2f,\"y\":%.2f,\"z\":%.2f,\"yaw\":%.2f,\"world\":\"%s\"}",
+                player.getUniqueId(),
+                player.getName(),
+                pos.x,
+                pos.y,
+                pos.z,
+                pos.yaw,
+                pos.world
+        );
+
+        sseManager.broadcast("player_join", json);
+    }
+
+    /**
      * Send player disconnect event.
      */
     public void onPlayerQuit(Player player) {
@@ -121,8 +150,15 @@ public class PlayerTracker extends BukkitRunnable {
 
     /**
      * Send initial player list to new SSE connection.
+     * Must be called from Bukkit thread or will schedule itself.
      */
     public void sendInitialPlayerList() {
+        // If not on main thread, schedule on main thread
+        if (!Bukkit.isPrimaryThread()) {
+            Bukkit.getScheduler().runTask(plugin, this::sendInitialPlayerList);
+            return;
+        }
+
         StringBuilder json = new StringBuilder("{\"players\":[");
 
         boolean first = true;
@@ -144,6 +180,8 @@ public class PlayerTracker extends BukkitRunnable {
         }
 
         json.append("]}");
+
+        LOGGER.fine("Broadcasting player_list: " + json.toString());
         sseManager.broadcast("player_list", json.toString());
     }
 

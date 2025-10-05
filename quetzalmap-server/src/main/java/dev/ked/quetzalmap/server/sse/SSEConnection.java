@@ -6,6 +6,7 @@ import io.undertow.util.Headers;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 
@@ -20,11 +21,13 @@ public final class SSEConnection {
     private final HttpServerExchange exchange;
     private final OutputStream outputStream;
     private final AtomicBoolean closed;
+    private final CountDownLatch closeLatch;
 
     public SSEConnection(int id, HttpServerExchange exchange) throws IOException {
         this.id = id;
         this.exchange = exchange;
         this.closed = new AtomicBoolean(false);
+        this.closeLatch = new CountDownLatch(1);
 
         // Set SSE headers
         exchange.setStatusCode(200);
@@ -89,10 +92,19 @@ public final class SSEConnection {
     }
 
     /**
+     * Block the current thread until the connection is closed.
+     * This keeps the HTTP handler thread alive for SSE.
+     */
+    public void awaitClose() throws InterruptedException {
+        closeLatch.await();
+    }
+
+    /**
      * Close the connection.
      */
     public void close() {
         if (closed.compareAndSet(false, true)) {
+            closeLatch.countDown();  // Release any waiting threads
             try {
                 outputStream.close();
             } catch (Exception e) {

@@ -1,7 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Map from './components/Map';
 import MapControls from './components/MapControls';
-import { useSSE } from './hooks/useSSE';
+import PlayerListPanel, { type Player } from './components/PlayerListPanel';
+import { useSSE, type SSEEvent } from './hooks/useSSE';
+import type { Map as LeafletMap } from 'leaflet';
 
 // API URL configuration
 // Use direct backend URL for both dev and prod to avoid proxy issues with SSE
@@ -12,6 +14,9 @@ function App() {
   const [availableWorlds, setAvailableWorlds] = useState<string[]>(['world']);
   const [scaleWidth, setScaleWidth] = useState(0);
   const [scaleText, setScaleText] = useState('');
+  const [showPlayerPanel, setShowPlayerPanel] = useState(false);
+  const [playerCount, setPlayerCount] = useState(0);
+  const mapRef = useRef<LeafletMap | null>(null);
 
   // Check which worlds have tiles on mount
   useEffect(() => {
@@ -44,10 +49,30 @@ function App() {
   // Connect to SSE for live updates
   const { connected, events } = useSSE(`${API_URL}/events`, true);
 
-  // Log events for debugging
-  if (events.length > 0) {
-    console.log('Recent events:', events.slice(-5));
-  }
+  // Update player count from events
+  useEffect(() => {
+    events.forEach((event: SSEEvent) => {
+      if (event.type === 'player_list') {
+        setPlayerCount((event.data.players || []).length);
+      } else if (event.type === 'player_join') {
+        setPlayerCount(prev => prev + 1);
+      } else if (event.type === 'player_disconnect') {
+        setPlayerCount(prev => Math.max(0, prev - 1));
+      }
+    });
+  }, [events]);
+
+  // Handle player click - center map on player
+  const handlePlayerClick = (player: Player) => {
+    if (mapRef.current) {
+      // Minecraft coordinates to map coordinates
+      // Leaflet uses [lat, lng] which maps to [-Z, X] in our CRS
+      mapRef.current.setView([-player.z, player.x], mapRef.current.getZoom(), {
+        animate: true,
+        duration: 0.5
+      });
+    }
+  };
 
   const handleScaleUpdate = (width: number, text: string) => {
     setScaleWidth(width);
@@ -63,6 +88,7 @@ function App() {
         center={[0, 0]}
         events={events}
         onScaleUpdate={handleScaleUpdate}
+        mapRef={mapRef}
       />
       <MapControls
         connected={connected}
@@ -71,6 +97,15 @@ function App() {
         availableWorlds={availableWorlds}
         scaleWidth={scaleWidth}
         scaleText={scaleText}
+        playerCount={playerCount}
+        onViewPlayers={() => setShowPlayerPanel(true)}
+      />
+      <PlayerListPanel
+        events={events}
+        currentWorld={world}
+        visible={showPlayerPanel}
+        onClose={() => setShowPlayerPanel(false)}
+        onPlayerClick={handlePlayerClick}
       />
     </div>
   );

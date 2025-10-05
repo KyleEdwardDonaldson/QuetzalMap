@@ -144,20 +144,25 @@ ls -lh QuetzalMap-1.0.0.jar
 - Smooth zoom with tile scaling
 - Connection status indicator
 
+### ✅ Real-Time Player Tracking
+- Live player position updates via SSE
+- Player markers with Minecraft character heads (via Crafatar API)
+- Real-time player list panel with join/leave updates
+- Click-to-center player location feature
+- Player count indicator with live updates
+
 ### 🚧 In Development
 - Plugin integration markers (Stormcraft, Bazaar, SilkRoad)
 - Multiple zoom level rendering
 - Chunk change detection and incremental updates
-- Player position tracking
 - In-game minimap (using Minecraft map items)
 
 ### 📋 Planned Features
 - WorldGuard region overlays
 - Towny town boundaries
 - Custom waypoints
-- Player list and locations
 - Event markers
-- Performance optimization (caching, async rendering)
+- Performance optimization enhancements
 
 ---
 
