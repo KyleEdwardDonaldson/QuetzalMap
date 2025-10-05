@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import Map from './components/Map';
 import MapControls from './components/MapControls';
 import PlayerListPanel, { type Player } from './components/PlayerListPanel';
+import StormListPanel from './components/StormListPanel';
 import { useSSE, type SSEEvent } from './hooks/useSSE';
 import type { Map as LeafletMap } from 'leaflet';
 
@@ -15,7 +16,9 @@ function App() {
   const [scaleWidth, setScaleWidth] = useState(0);
   const [scaleText, setScaleText] = useState('');
   const [showPlayerPanel, setShowPlayerPanel] = useState(false);
+  const [showStormPanel, setShowStormPanel] = useState(false);
   const [playerCount, setPlayerCount] = useState(0);
+  const [stormCount, setStormCount] = useState(0);
   const mapRef = useRef<LeafletMap | null>(null);
 
   // Check which worlds have tiles on mount
@@ -49,7 +52,7 @@ function App() {
   // Connect to SSE for live updates
   const { connected, events } = useSSE(`${API_URL}/events`, true);
 
-  // Update player count from events
+  // Update player and storm counts from events
   useEffect(() => {
     events.forEach((event: SSEEvent) => {
       if (event.type === 'player_list') {
@@ -58,9 +61,13 @@ function App() {
         setPlayerCount(prev => prev + 1);
       } else if (event.type === 'player_disconnect') {
         setPlayerCount(prev => Math.max(0, prev - 1));
+      } else if (event.type === 'storm_update') {
+        const storms = event.data.storms || [];
+        const worldStorms = storms.filter((s: any) => s.world === world);
+        setStormCount(worldStorms.length);
       }
     });
-  }, [events]);
+  }, [events, world]);
 
   // Handle player click - center map on player
   const handlePlayerClick = (player: Player) => {
@@ -68,6 +75,18 @@ function App() {
       // Minecraft coordinates to map coordinates
       // Leaflet uses [lat, lng] which maps to [-Z, X] in our CRS
       mapRef.current.setView([-player.z, player.x], mapRef.current.getZoom(), {
+        animate: true,
+        duration: 0.5
+      });
+    }
+  };
+
+  // Handle storm click - center map on storm
+  const handleStormClick = (storm: any) => {
+    if (mapRef.current) {
+      // Minecraft coordinates to map coordinates
+      // Leaflet uses [lat, lng] which maps to [-Z, X] in our CRS
+      mapRef.current.setView([-storm.z, storm.x], mapRef.current.getZoom(), {
         animate: true,
         duration: 0.5
       });
@@ -99,6 +118,8 @@ function App() {
         scaleText={scaleText}
         playerCount={playerCount}
         onViewPlayers={() => setShowPlayerPanel(true)}
+        stormCount={stormCount}
+        onViewStorms={() => setShowStormPanel(true)}
       />
       <PlayerListPanel
         events={events}
@@ -106,6 +127,13 @@ function App() {
         visible={showPlayerPanel}
         onClose={() => setShowPlayerPanel(false)}
         onPlayerClick={handlePlayerClick}
+      />
+      <StormListPanel
+        events={events}
+        currentWorld={world}
+        visible={showStormPanel}
+        onClose={() => setShowStormPanel(false)}
+        onStormClick={handleStormClick}
       />
     </div>
   );

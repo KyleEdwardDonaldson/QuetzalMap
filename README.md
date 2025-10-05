@@ -16,12 +16,12 @@ QuetzalMap is a high-performance map rendering plugin that provides a modern web
 - **Multi-world support** - View Overworld, Nether, and End dimensions
 - **Server-Sent Events (SSE)** - Real-time updates streamed to connected clients
 
-### Plugin Integrations (Planned)
-- **Stormcraft** - Live storm tracking with movement indicators
-- **Bazaar** - Shop location markers
-- **SilkRoad** - Transporter stations and trade posts
-- **WorldGuard** - Region visualization
-- **Towny** - Town and nation boundaries
+### Plugin Integrations
+- **Stormcraft** ✅ - Live storm tracking with movement indicators, storm list panel
+- **Bazaar** (Planned) - Shop location markers
+- **SilkRoad** (Planned) - Transporter stations and trade posts
+- **WorldGuard** (Planned) - Region visualization
+- **Towny** (Planned) - Town and nation boundaries
 
 ### Map Features
 - **Google Maps-style scale indicator** - Responsive distance measurement
@@ -151,8 +151,18 @@ ls -lh QuetzalMap-1.0.0.jar
 - Click-to-center player location feature
 - Player count indicator with live updates
 
+### ✅ Stormcraft Integration
+- Live storm position tracking via SSE
+- Storm markers with animated circles showing radius
+- Storm movement indicators (direction arrows)
+- Real-time storm list panel with detailed stats
+- Storm phase visualization (FORMING, PEAK, DISSIPATING)
+- Storm type color coding (SHORT_WEAK, MEDIUM, LONG_DANGEROUS)
+- Click-to-center storm location feature
+- Storm count indicator with live updates
+
 ### 🚧 In Development
-- Plugin integration markers (Stormcraft, Bazaar, SilkRoad)
+- Additional plugin integration markers (Bazaar, SilkRoad)
 - Multiple zoom level rendering
 - Chunk change detection and incremental updates
 - In-game minimap (using Minecraft map items)

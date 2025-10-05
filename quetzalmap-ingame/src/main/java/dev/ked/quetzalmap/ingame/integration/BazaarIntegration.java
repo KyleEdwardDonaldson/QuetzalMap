@@ -94,7 +94,7 @@ public class BazaarIntegration implements Integration {
         int shopCount = 0;
 
         // Get all shops (ShopEntity) from the registry
-        Collection<ShopEntity> allShops = registry.getAllShops();
+        Collection<ShopEntity> allShops = registry.getAllShopEntities();
 
         // Track owners if grouping is enabled
         java.util.Set<UUID> processedOwners = new java.util.HashSet<>();

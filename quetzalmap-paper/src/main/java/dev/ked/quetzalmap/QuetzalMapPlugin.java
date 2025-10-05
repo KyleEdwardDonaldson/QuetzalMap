@@ -26,6 +26,7 @@ public final class QuetzalMapPlugin extends JavaPlugin {
     private PlayerQuitListener playerQuitListener;
     private TilePreGenerator preGenerator;
     private PlayerTracker playerTracker;
+    private dev.ked.quetzalmap.integration.StormcraftIntegration stormcraftIntegration;
 
     @Override
     public void onEnable() {
@@ -76,6 +77,11 @@ public final class QuetzalMapPlugin extends JavaPlugin {
             // Stop player tracker first
             if (playerTracker != null) {
                 playerTracker.cancel();
+            }
+
+            // Shutdown Stormcraft integration
+            if (stormcraftIntegration != null) {
+                stormcraftIntegration.shutdown();
             }
 
             // Stop pre-generation
@@ -151,6 +157,16 @@ public final class QuetzalMapPlugin extends JavaPlugin {
 
         playerQuitListener = new PlayerQuitListener(playerTracker);
         LOGGER.info("PlayerQuitListener initialized");
+
+        // Initialize Stormcraft integration (optional dependency)
+        stormcraftIntegration = new dev.ked.quetzalmap.integration.StormcraftIntegration(
+            webServer.getSSEManager(), this);
+        if (stormcraftIntegration.initialize()) {
+            LOGGER.info("Stormcraft integration enabled");
+        } else {
+            LOGGER.info("Stormcraft integration not available (plugin not found or disabled)");
+            stormcraftIntegration = null;
+        }
     }
 
     /**

@@ -7,6 +7,8 @@ interface MapControlsProps {
   scaleWidth?: number;
   playerCount?: number;
   onViewPlayers?: () => void;
+  stormCount?: number;
+  onViewStorms?: () => void;
 }
 
 // World name mappings for display
@@ -19,7 +21,7 @@ const WORLD_NAMES: Record<string, string> = {
 /**
  * Map control panel - displays connection status and controls
  */
-export default function MapControls({ connected, world, onWorldChange, availableWorlds, scaleText, scaleWidth, playerCount = 0, onViewPlayers }: MapControlsProps) {
+export default function MapControls({ connected, world, onWorldChange, availableWorlds, scaleText, scaleWidth, playerCount = 0, onViewPlayers, stormCount = 0, onViewStorms }: MapControlsProps) {
   return (
     <div className="absolute top-4 right-4 z-[1000] space-y-2">
       {/* Main controls */}
@@ -36,21 +38,42 @@ export default function MapControls({ connected, world, onWorldChange, available
             </div>
           </div>
 
-          {/* Players button - subtle and elegant */}
-          <button
-            onClick={onViewPlayers}
-            className="w-full px-3 py-2 border border-gray-300 hover:border-gray-400 hover:bg-gray-50 text-gray-700 rounded-md text-sm font-medium transition-all flex items-center justify-between group"
-          >
-            <div className="flex items-center gap-2">
-              <svg className="w-4 h-4 text-gray-600 group-hover:text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-              </svg>
-              <span>Players</span>
-            </div>
-            <span className="px-2 py-0.5 bg-gray-200 group-hover:bg-gray-300 rounded-full text-xs font-semibold text-gray-700 transition-colors">
-              {playerCount}
-            </span>
-          </button>
+          {/* Info buttons */}
+          <div className="flex gap-2">
+            {/* Players button */}
+            <button
+              onClick={onViewPlayers}
+              className="flex-1 px-3 py-2 border border-gray-300 hover:border-gray-400 hover:bg-gray-50 text-gray-700 rounded-md text-sm font-medium transition-all flex items-center justify-between group"
+            >
+              <div className="flex items-center gap-2">
+                <svg className="w-4 h-4 text-gray-600 group-hover:text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                <span>Players</span>
+              </div>
+              <span className="px-2 py-0.5 bg-gray-200 group-hover:bg-gray-300 rounded-full text-xs font-semibold text-gray-700 transition-colors">
+                {playerCount}
+              </span>
+            </button>
+
+            {/* Storms button */}
+            <button
+              onClick={onViewStorms}
+              className="flex-1 px-3 py-2 border border-gray-300 hover:border-gray-400 hover:bg-gray-50 text-gray-700 rounded-md text-sm font-medium transition-all flex items-center justify-between group"
+            >
+              <div className="flex items-center gap-1">
+                <span className="text-base">⚡</span>
+                <span>Storms</span>
+              </div>
+              <span className={`px-2 py-0.5 rounded-full text-xs font-semibold transition-colors ${
+                stormCount > 0
+                  ? 'bg-red-200 group-hover:bg-red-300 text-red-700'
+                  : 'bg-gray-200 group-hover:bg-gray-300 text-gray-700'
+              }`}>
+                {stormCount}
+              </span>
+            </button>
+          </div>
 
           {/* World selector - only show if multiple worlds available */}
           {availableWorlds.length > 1 && (

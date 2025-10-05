@@ -1,7 +1,10 @@
+dev/ked/quetzalmap/PlayerJoinListener.class
 dev/ked/quetzalmap/BatchUpdateScheduler$ChunkUpdate.class
 dev/ked/quetzalmap/QuetzalMapPlugin.class
 dev/ked/quetzalmap/PlayerTracker.class
 dev/ked/quetzalmap/PlayerTracker$PlayerPosition.class
+dev/ked/quetzalmap/integration/StormcraftIntegration$1.class
+dev/ked/quetzalmap/integration/StormcraftIntegration.class
 dev/ked/quetzalmap/ChunkEventListener.class
 dev/ked/quetzalmap/PlayerQuitListener.class
 dev/ked/quetzalmap/BatchUpdateScheduler.class

@@ -51,13 +51,13 @@
             <systemPath>${project.basedir}/../../Stormcraft/target/stormcraft-0.1.0.jar</systemPath>
         </dependency>
 
-        <!-- BetterShop -->
+        <!-- Bazaar -->
         <dependency>
             <groupId>dev.ked</groupId>
-            <artifactId>bettershop</artifactId>
-            <version>1.0.0</version>
+            <artifactId>bazaar</artifactId>
+            <version>0.1.0</version>
             <scope>system</scope>
-            <systemPath>${project.basedir}/../../BetterShop/target/BetterShop-1.0.0.jar</systemPath>
+            <systemPath>${project.basedir}/../../Bazaar/target/bazaar-0.1.0.jar</systemPath>
         </dependency>
     </dependencies>
 

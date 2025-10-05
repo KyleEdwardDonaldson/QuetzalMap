@@ -26,6 +26,17 @@ QuetzalMap is a real-time web-based live map plugin for Minecraft Paper 1.21.3+ 
 - Player count indicator with real-time updates
 - Player head avatars in player list
 
+**Stormcraft Integration:**
+- Real-time storm position tracking via SSE
+- Storm markers with animated circles showing radius
+- Storm movement indicators (direction arrows to target)
+- Live storm list panel with detailed statistics
+- Storm phase visualization (FORMING, PEAK, DISSIPATING)
+- Storm type color coding (SHORT_WEAK, MEDIUM, LONG_DANGEROUS)
+- Click-to-center storm location
+- Storm count indicator with real-time updates
+- Integration with Stormcraft's traveling storm system
+
 **Performance Optimizations:**
 - Caffeine caching for tile data
 - Async tile rendering
@@ -41,8 +52,7 @@ QuetzalMap is a real-time web-based live map plugin for Minecraft Paper 1.21.3+ 
 - Custom map renderer integration
 - Marker system for in-game display
 
-**Plugin Integrations:**
-- Stormcraft: Live storm tracking markers
+**Plugin Integrations (Remaining):**
 - Bazaar: Shop location markers
 - SilkRoad: Transporter and trade post markers
 - StormcraftDungeons: Dungeon portal markers
@@ -80,7 +90,9 @@ quetzalmap/
 │   ├─ PlayerQuitListener - Broadcasts player leave events
 │   ├─ ChunkEventListener - Tracks chunk changes
 │   ├─ BatchUpdateScheduler - Debounces chunk updates
-│   └─ WorldAdapter - Bukkit world → file system bridge
+│   ├─ WorldAdapter - Bukkit world → file system bridge
+│   └─ integration/
+│       └─ StormcraftIntegration - Stormcraft storm tracking
 │
 ├─ quetzalmap-ingame/     # In-game map features (planned)
 │   └─ Custom map renderer for minimap
@@ -91,6 +103,8 @@ quetzalmap/
     │   │   ├─ Map.tsx - Leaflet map container
     │   │   ├─ PlayerMarkers.tsx - Live player markers
     │   │   ├─ PlayerListPanel.tsx - Player list UI
+    │   │   ├─ StormMarkers.tsx - Live storm markers
+    │   │   ├─ StormListPanel.tsx - Storm list UI
     │   │   ├─ MapControls.tsx - UI controls
     │   │   └─ ScaleBar.tsx - Distance indicator
     │   └─ hooks/
@@ -208,6 +222,33 @@ Broadcast when a chunk changes and tile is re-rendered.
   "zoom": 0,
   "x": 10,
   "z": -5
+}
+```
+
+### `storm_update`
+Broadcast every second with all active traveling storms (Stormcraft integration).
+```json
+{
+  "storms": [
+    {
+      "id": "storm_1759634749624",
+      "x": 5483.43,
+      "z": -6299.97,
+      "targetX": -11282.00,
+      "targetZ": 12962.00,
+      "radius": 2344.96,
+      "baseRadius": 2344.96,
+      "radiusMultiplier": 1.000,
+      "phase": "DISSIPATING",
+      "phaseSymbol": "§7⬇",
+      "phaseMultiplier": 0.985,
+      "type": "MEDIUM",
+      "damage": 0.44,
+      "speed": 2.00,
+      "remainingSeconds": 1342,
+      "world": "world"
+    }
+  ]
 }
 ```
 
@@ -346,6 +387,14 @@ python3 -m http.server 7825 --bind 0.0.0.0 --directory dist
 - Verify player UUID format
 - Check Crafatar API is accessible
 - Test: `https://crafatar.com/avatars/{uuid}`
+
+**Storm markers not showing:**
+- Verify Stormcraft plugin is installed and enabled
+- Check StormcraftIntegration initialized in logs
+- Verify `storm_update` event type is in useSSE.ts event list
+- Test SSE: `curl http://server:8123/events | grep storm_update`
+- Check browser console for `[SSE] Event: storm_update` logs
+- Ensure traveling storms are active (not just stationary storms)
 
 **Coordinate issues:**
 - Verify CRS transformation is correct

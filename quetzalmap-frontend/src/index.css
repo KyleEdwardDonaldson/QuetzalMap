@@ -37,3 +37,33 @@ body {
   image-rendering: -moz-crisp-edges;
   image-rendering: crisp-edges;
 }
+
+/* Storm marker animations */
+@keyframes pulse-storm {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+.storm-icon-container {
+  animation: pulse-storm 2s infinite ease-in-out;
+}
+
+.storm-marker-icon {
+  z-index: 500; /* Above circles but below popups */
+}
+
+/* Storm popup styling */
+.storm-popup {
+  min-width: 220px;
+}
+
+.storm-popup h3 {
+  color: #ff4444;
+  margin: 0 0 0.5rem 0;
+}
