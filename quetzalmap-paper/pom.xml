@@ -102,6 +102,7 @@
                                     </excludes>
                                 </filter>
                             </filters>
+                            <!-- Don't relocate - causes issues with inner classes and Paper classloader -->
                         </configuration>
                     </execution>
                 </executions>
